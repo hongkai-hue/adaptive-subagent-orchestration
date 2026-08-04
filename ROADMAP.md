@@ -2,9 +2,8 @@
 
 ## Current stage
 
-The `v0.1.0` open-source release is online. Integration, independent QA, the public GitHub
-Actions matrix, a full fresh-clone lifecycle Gate, the tag, and the GitHub Release are
-verified.
+The `v0.1.0` open-source release is online. A six-image bilingual README enhancement is a
+verified local Release Candidate and is paused at the explicit public-push Gate.
 
 ## Completed and verified
 
@@ -19,14 +18,22 @@ verified.
   contract, and a runtime surface matrix are present.
 - Contract, lifecycle, architecture, documentation, link, and privacy tests run through
   recursive standard-library discovery.
+- The README visual candidate contains one inspected ImageGen WebP, five accessible deterministic
+  SVGs, localized alt/captions in both READMEs, and an interactive visual architecture.
+- GitHub-flavored Markdown previews passed desktop light/dark inspection and actual 390 px mobile
+  overflow checks; source validation and the expanded 33-test recursive suite pass locally.
 
 ## In progress
 
-- Collect additional sanitized App/CLI evidence before expanding support claims.
+- Await explicit authorization for a normal documentation-only push to the existing public
+  `main`; no tag or GitHub Release change is planned.
 
 ## Next
 
+- After authorization, transfer the candidate through a fresh public clone, wait for GitHub
+  Actions, and verify both public READMEs and all six unauthenticated asset URLs.
 - Evaluate post-release feedback without expanding the v0.1 support claim prematurely.
+- Collect additional sanitized App/CLI evidence before expanding support claims.
 
 ## Known limitations
 

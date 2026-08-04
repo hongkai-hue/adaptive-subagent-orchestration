@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" role="img" aria-labelledby="title desc">
+  <title id="title">Fail-closed installation lifecycle</title>
+  <desc id="desc">Fresh installation validates a staged bundle before writing the target. Replacement validates and backs up the current bundle before swapping. Uninstall removes only manifest-owned files with matching checksums and preserves modified files.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#475569"/></marker>
+  </defs>
+  <rect width="1200" height="720" rx="28" fill="#f8fafc"/>
+  <g font-family="ui-sans-serif, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif">
+    <text x="60" y="66" fill="#0f172a" font-size="32" font-weight="700">Validate before mutation; preserve on uncertainty</text>
+    <text x="60" y="102" fill="#475569" font-size="18">The lifecycle owns two runtime files and a checksum manifest—never account or agent configuration.</text>
+
+    <rect x="65" y="140" width="210" height="74" rx="16" fill="#0f172a"/>
+    <text x="170" y="172" fill="#ffffff" font-size="20" font-weight="700" text-anchor="middle">TARGET PREFLIGHT</text>
+    <text x="170" y="198" fill="#cbd5e1" font-size="15" text-anchor="middle">resolve path · lock · dry-run</text>
+
+    <line x1="275" y1="177" x2="365" y2="177" stroke="#475569" stroke-width="4" marker-end="url(#arrow)"/>
+    <rect x="370" y="140" width="210" height="74" rx="16" fill="#e0f2fe" stroke="#0284c7" stroke-width="3"/>
+    <text x="475" y="172" fill="#0c4a6e" font-size="20" font-weight="700" text-anchor="middle">STAGING</text>
+    <text x="475" y="198" fill="#334155" font-size="15" text-anchor="middle">copy owned runtime subset</text>
+
+    <line x1="580" y1="177" x2="670" y2="177" stroke="#475569" stroke-width="4" marker-end="url(#arrow)"/>
+    <rect x="675" y="140" width="210" height="74" rx="16" fill="#ecfdf5" stroke="#059669" stroke-width="3"/>
+    <text x="780" y="172" fill="#065f46" font-size="20" font-weight="700" text-anchor="middle">VALIDATE</text>
+    <text x="780" y="198" fill="#334155" font-size="14" text-anchor="middle">metadata · manifest · checksums</text>
+
+    <line x1="885" y1="177" x2="975" y2="177" stroke="#475569" stroke-width="4" marker-end="url(#arrow)"/>
+    <rect x="980" y="140" width="155" height="74" rx="16" fill="#dcfce7" stroke="#16a34a" stroke-width="3"/>
+    <text x="1057" y="172" fill="#166534" font-size="20" font-weight="700" text-anchor="middle">READY</text>
+    <text x="1057" y="198" fill="#334155" font-size="15" text-anchor="middle">safe to mutate</text>
+
+    <text x="60" y="278" fill="#2563eb" font-size="23" font-weight="700">FRESH INSTALL</text>
+    <line x1="170" y1="290" x2="170" y2="350" stroke="#2563eb" stroke-width="4" marker-end="url(#arrow)"/>
+    <rect x="65" y="355" width="210" height="86" rx="16" fill="#eff6ff" stroke="#2563eb" stroke-width="3"/>
+    <text x="170" y="388" fill="#1e3a8a" font-size="19" font-weight="700" text-anchor="middle">ABSENT TARGET</text>
+    <text x="170" y="416" fill="#334155" font-size="15" text-anchor="middle">atomic rename → installed</text>
+
+    <text x="345" y="278" fill="#7c3aed" font-size="23" font-weight="700">EXPLICIT REPLACE</text>
+    <line x1="475" y1="290" x2="475" y2="350" stroke="#7c3aed" stroke-width="4" marker-end="url(#arrow)"/>
+    <rect x="340" y="355" width="270" height="86" rx="16" fill="#f5f3ff" stroke="#7c3aed" stroke-width="3"/>
+    <text x="475" y="386" fill="#5b21b6" font-size="19" font-weight="700" text-anchor="middle">VALID CURRENT MANIFEST</text>
+    <text x="475" y="414" fill="#334155" font-size="15" text-anchor="middle">sibling backup → swap → validate</text>
+
+    <text x="690" y="278" fill="#059669" font-size="23" font-weight="700">UNINSTALL</text>
+    <line x1="780" y1="290" x2="780" y2="350" stroke="#059669" stroke-width="4" marker-end="url(#arrow)"/>
+    <rect x="660" y="355" width="240" height="86" rx="16" fill="#ecfdf5" stroke="#059669" stroke-width="3"/>
+    <text x="780" y="386" fill="#065f46" font-size="19" font-weight="700" text-anchor="middle">VERIFY OWNED FILES</text>
+    <text x="780" y="414" fill="#334155" font-size="15" text-anchor="middle">matching checksums → remove</text>
+
+    <text x="970" y="278" fill="#ea580c" font-size="23" font-weight="700">FAIL CLOSED</text>
+    <line x1="1057" y1="290" x2="1057" y2="350" stroke="#ea580c" stroke-width="4" marker-end="url(#arrow)"/>
+    <rect x="930" y="355" width="255" height="86" rx="16" fill="#fff7ed" stroke="#ea580c" stroke-width="3"/>
+    <text x="1057" y="386" fill="#9a3412" font-size="19" font-weight="700" text-anchor="middle">PRESERVE TARGET</text>
+    <text x="1057" y="414" fill="#7c2d12" font-size="15" text-anchor="middle">modified · malformed · symlink</text>
+
+    <rect x="60" y="495" width="1080" height="145" rx="22" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+    <text x="90" y="535" fill="#0f172a" font-size="21" font-weight="700">Non-zero + no unsafe mutation</text>
+    <text x="90" y="570" fill="#475569" font-size="17">Existing target without --replace · validation failure · lock conflict · invalid path · checksum mismatch</text>
+    <text x="90" y="606" fill="#475569" font-size="17">Dry-run is side-effect free. Success is reported only after final target validation.</text>
+
+    <rect x="60" y="658" width="1080" height="36" rx="12" fill="#0f172a"/>
+    <text x="600" y="682" fill="#ffffff" font-size="16" font-weight="700" text-anchor="middle">Runtime bundle: SKILL.md + agents/openai.yaml + ownership manifest</text>
+  </g>
+</svg>

@@ -4,6 +4,10 @@
 
 **当前支持状态：** v0.1.0 已发布。Public 仓库、GitHub Actions 矩阵、公网 fresh-clone 生命周期 Gate、版本 tag 与 GitHub Release 均已通过验证。标准库契约测试覆盖静态规则、生命周期和若干前向用例；脱敏前向记录覆盖代表性的路由和结果回收。完整的 App／CLI 与操作系统覆盖、隐式触发和请求级 runtime identity 仍是未验证状态，详见 [运行面矩阵](docs/runtime-surface-matrix.md)。
 
+![一个抽象父节点将工作路由到两条隔离车道，并把两份证据汇合为一个结果。](docs/assets/readme/hero-orchestration.webp)
+
+*图 1：一个父线程保持控制，两条隔离车道把证据返回到同一个结果。*
+
 ## 它解决什么
 
 | 不使用这个 skill | 使用这个 skill |
@@ -14,9 +18,17 @@
 | 候选发生变化后继续沿用旧证据。 | 旧 PASS 失效，重新运行最终 Gate。 |
 | 没有新诊断就重复重试。 | 原 owner 在原范围内最多进行一次带具体 Delta 的 focused retry。 |
 
+![拥有独立 Gate 的不相交 L2 写入车道，与共享热点串行路径的对比图。](docs/assets/readme/ownership-boundaries.svg)
+
+*图 2：独立范围可以进入 L2，共享可写路径必须由父线程串行处理。*
+
 竞争车道必须有互不重叠的写入范围和独立 Gate，才能进入 L2。共享热点、严格依赖、无法剥离的敏感上下文、迁移或发布工作留在主线程串行处理。跨模块契约、波次、恢复或发布准备工作交给 L3 的 heavy orchestration。
 
 ## 路由级别
+
+![从本地执行、只读探索、隔离实现到重型编排交接的 L0-L3 路由层级图。](docs/assets/readme/routing-levels.svg)
+
+*图 3：只选择能够产生有价值独立车道的最小路由层级。*
 
 | 级别 | 适用场景 | agent 数量 | 结果 |
 | --- | --- | ---: | --- |
@@ -35,9 +47,17 @@
 Use $adaptive-subagent-orchestration to assess this task, create only worthwhile independent lanes, and integrate verified results.
 ```
 
+![从用户目标、父线程预检、受限车道执行、结构化结果检查到父线程最终 Gate 的时序图。](docs/assets/readme/parent-agent-sequence.svg)
+
+*图 4：Transport 完成不等于业务 PASS；父线程负责检查、集成和最终验证。*
+
 UI 元数据只表示允许隐式触发，不保证 Codex 一定选择这个 skill。推荐显式调用。可以把可选规则手工复制到项目或用户的 `AGENTS.md`，安装脚本不会自动修改这些文件，模板见 [templates/AGENTS-routing.md](templates/AGENTS-routing.md)。
 
 ## 安全安装
+
+![覆盖目标预检、staging、校验、安装、带备份的显式替换和 checksum 安全卸载的 fail-closed 生命周期图。](docs/assets/readme/install-lifecycle.svg)
+
+*图 5：生命周期脚本只在校验通过后执行修改，存在不确定性时保留目标。*
 
 运行包没有第三方 runtime 依赖，也不会配置或读取 account、provider、model、proxy、API key 或 token。skill discovery 和 subagent 能力由 Codex 提供；脚本只管理两个 runtime 文件和 ownership manifest。
 
@@ -101,6 +121,10 @@ UI 元数据只表示允许隐式触发，不保证 Codex 一定选择这个 ski
 - **Runtime 边界：** subagent 的创建、等待和关闭由 Codex 完成；transport completed 不等于业务 `PASS`，主线程必须检查结构化结果，并在候选变化后重跑 Gate。
 - **平台状态：** [运行面矩阵](docs/runtime-surface-matrix.md) 区分静态／前向证据与尚未验证的 App、CLI、OS 覆盖；Windows 不在 v0.1 支持声明内。
 
+![候选变化会让旧结果失效，并要求在父线程最终 Gate 前重跑受影响验证的证据闭环图。](docs/assets/readme/evidence-gate-loop.svg)
+
+*图 6：证据只属于一个确定候选；相关变化会让之前的 PASS 失效。*
+
 ## 开发与验证
 
 canonical source 在本仓库。安装后的 runtime bundle 只包含 `SKILL.md`、`agents/openai.yaml` 和 `.install-manifest.json`；测试与文档不会复制到运行目录。
@@ -113,6 +137,8 @@ git diff --check
 ```
 
 贡献、漏洞报告和行为规范见 [CONTRIBUTING.md](CONTRIBUTING.md)、[SECURITY.md](SECURITY.md) 与 [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)。项目采用 Apache-2.0，并发布在 `https://github.com/hongkai-hue/adaptive-subagent-orchestration`。
+
+完整的模块、信任边界和发布流程见 [架构说明](docs/architecture/oss-launch-architecture.md) 与 [交互式架构图](docs/architecture/oss-launch-architecture.html) 。
 
 ## 目录说明
 

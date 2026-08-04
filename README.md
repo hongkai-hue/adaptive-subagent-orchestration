@@ -4,6 +4,10 @@ Route a medium Codex task to the smallest useful set of lanes, keep one owner fo
 
 **Current support status:** v0.1.0 is published. The public repository, GitHub Actions matrix, fresh-clone lifecycle Gate, version tag, and GitHub Release have passed verification. Static contracts, lifecycle behavior, and selected forward cases are covered by the repository tests. A sanitized desktop forward record covers representative routing and result collection. Complete App/CLI and OS coverage, implicit triggering, and request-level runtime identity remain unverified; see the [runtime surface matrix](docs/runtime-surface-matrix.md).
 
+![Abstract parent hub routing work through two isolated lanes and merging two evidence tokens into one result.](docs/assets/readme/hero-orchestration.webp)
+
+*Figure 1. One parent keeps control while two isolated lanes return evidence to a single result.*
+
 ## What changes
 
 | Without this skill | With this skill |
@@ -14,9 +18,17 @@ Route a medium Codex task to the smallest useful set of lanes, keep one owner fo
 | Reuse stale evidence after the candidate changes. | Invalidate the old pass and rerun the final Gate. |
 | Retry without a changed diagnosis. | Allow at most one focused retry with a concrete Delta and the same owner/scope. |
 
+![Disjoint L2 write lanes with independent Gates compared with a shared-hotspot serial path.](docs/assets/readme/ownership-boundaries.svg)
+
+*Figure 2. Independent scopes can use L2; a shared writable path stays serial on the parent.*
+
 The competing-lane distinction matters: disjoint, independently testable write scopes can be L2; a shared hotspot, strict dependency, sensitive context, migration, or release stays serial on the main thread. A cross-module contract or multi-wave DAG is an L3 handoff to heavy orchestration.
 
 ## Routing levels
+
+![L0-L3 routing levels from local execution through read-only exploration and isolated implementation to heavy-orchestration handoff.](docs/assets/readme/routing-levels.svg)
+
+*Figure 3. Choose the smallest routing level that creates a useful independent lane.*
 
 | Level | Use when | Agents | Outcome |
 | --- | --- | ---: | --- |
@@ -35,9 +47,17 @@ In a Codex task, invoke the skill by name:
 Use $adaptive-subagent-orchestration to assess this task, create only worthwhile independent lanes, and integrate verified results.
 ```
 
+![Sequence from user goal through parent preflight, bounded lane work, structured result inspection, and the parent final Gate.](docs/assets/readme/parent-agent-sequence.svg)
+
+*Figure 4. Transport completion is not business PASS; the parent inspects, integrates, and verifies.*
+
 The UI metadata permits implicit eligibility, but it cannot make triggering deterministic. Explicit invocation is the reliable path. An optional rule can be copied manually into a repository or user `AGENTS.md`; the installer never edits those files. See [templates/AGENTS-routing.md](templates/AGENTS-routing.md).
 
 ## Install safely
+
+![Fail-closed lifecycle covering target preflight, staging, validation, install, explicit replacement with backup, and checksum-safe uninstall.](docs/assets/readme/install-lifecycle.svg)
+
+*Figure 5. Lifecycle scripts mutate only after validation and preserve the target on uncertainty.*
 
 The package itself has no third-party runtime dependency and does not configure an account, provider, model, proxy, API key, or token. Codex supplies skill discovery and subagent capabilities. The scripts only manage the two runtime files and an ownership manifest.
 
@@ -103,6 +123,10 @@ The cases are contract examples, not performance promises. Token budgets, confli
 - **Runtime boundary:** Codex, not this repository, creates, waits for, and closes subagents. Transport completion is not a business `PASS`; the parent must inspect the structured result and rerun any invalidated Gate.
 - **Platform status:** the [runtime surface matrix](docs/runtime-surface-matrix.md) distinguishes static and forward evidence from unverified App, CLI, and OS coverage. Windows is outside the v0.1 support claim.
 
+![Evidence loop in which candidate changes invalidate stale results and force affected verification before the parent final Gate.](docs/assets/readme/evidence-gate-loop.svg)
+
+*Figure 6. Evidence belongs to one exact candidate; a relevant change makes the previous PASS stale.*
+
 ## Development
 
 The canonical source is this repository. The runtime bundle is limited to `SKILL.md`, `agents/openai.yaml`, and `.install-manifest.json` after installation; tests and docs are not copied into it.
@@ -117,6 +141,8 @@ git diff --check
 ```
 
 See [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) before opening a change. The project is published under Apache-2.0 at `https://github.com/hongkai-hue/adaptive-subagent-orchestration`.
+
+For the complete module, trust-boundary, and publication flow, read the [architecture notes](docs/architecture/oss-launch-architecture.md) or open the [interactive architecture diagram](docs/architecture/oss-launch-architecture.html).
 
 ## Repository map
 

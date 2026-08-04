@@ -2,7 +2,9 @@ import unittest
 from html.parser import HTMLParser
 from pathlib import Path
 import re
+import struct
 import subprocess
+import xml.etree.ElementTree as ET
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -10,6 +12,64 @@ ARCHITECTURE_MD = ROOT / "docs" / "architecture" / "oss-launch-architecture.md"
 ARCHITECTURE_HTML = ROOT / "docs" / "architecture" / "oss-launch-architecture.html"
 README = ROOT / "README.md"
 README_ZH = ROOT / "README.zh-CN.md"
+README_VISUAL_ARCHITECTURE_MD = (
+    ROOT / "docs" / "architecture" / "readme-visual-polish-architecture.md"
+)
+README_VISUAL_ARCHITECTURE_HTML = (
+    ROOT / "docs" / "architecture" / "readme-visual-polish-architecture.html"
+)
+README_ASSET_DIR = ROOT / "docs" / "assets" / "readme"
+README_IMAGE_TARGETS = [
+    "docs/assets/readme/hero-orchestration.webp",
+    "docs/assets/readme/ownership-boundaries.svg",
+    "docs/assets/readme/routing-levels.svg",
+    "docs/assets/readme/parent-agent-sequence.svg",
+    "docs/assets/readme/install-lifecycle.svg",
+    "docs/assets/readme/evidence-gate-loop.svg",
+]
+MARKDOWN_IMAGE_PATTERN = re.compile(r"!\[([^\]]+)\]\(([^)]+)\)")
+
+
+def _readme_image_entries(path):
+    lines = path.read_text(encoding="utf-8").splitlines()
+    entries = []
+    for index, line in enumerate(lines):
+        match = MARKDOWN_IMAGE_PATTERN.fullmatch(line.strip())
+        if not match:
+            continue
+        caption = ""
+        for following in lines[index + 1 :]:
+            if following.strip():
+                caption = following.strip()
+                break
+        entries.append((match.group(1), match.group(2), caption))
+    return entries
+
+
+def _webp_dimensions(path):
+    data = path.read_bytes()
+    if data[:4] != b"RIFF" or data[8:12] != b"WEBP":
+        raise ValueError("not a WebP RIFF container")
+    chunk = data[12:16]
+    payload = data[20:]
+    if chunk == b"VP8 ":
+        marker = payload.find(b"\x9d\x01\x2a")
+        if marker < 0 or len(payload) < marker + 7:
+            raise ValueError("missing VP8 frame header")
+        width, height = struct.unpack_from("<HH", payload, marker + 3)
+        return width & 0x3FFF, height & 0x3FFF
+    if chunk == b"VP8L":
+        if len(payload) < 5 or payload[0] != 0x2F:
+            raise ValueError("missing VP8L frame header")
+        bits = int.from_bytes(payload[1:5], "little")
+        return (bits & 0x3FFF) + 1, ((bits >> 14) & 0x3FFF) + 1
+    if chunk == b"VP8X":
+        if len(payload) < 10:
+            raise ValueError("missing VP8X frame header")
+        width = int.from_bytes(payload[4:7], "little") + 1
+        height = int.from_bytes(payload[7:10], "little") + 1
+        return width, height
+    raise ValueError(f"unsupported WebP chunk: {chunk!r}")
 
 
 class _DocumentParser(HTMLParser):
@@ -75,6 +135,54 @@ class ArchitectureDocsTests(unittest.TestCase):
         )
 
 
+class ReadmeVisualArchitectureTests(unittest.TestCase):
+    def test_visual_architecture_has_required_boundaries(self):
+        markdown = README_VISUAL_ARCHITECTURE_MD.read_text(encoding="utf-8")
+        for text in [
+            "## Module Responsibilities",
+            "## Data Flow And Trust Boundaries",
+            "## Failure Design And Recovery",
+            "## Deployment Units",
+            "## Parallelism Boundaries",
+            "ImageGen hero",
+            "Deterministic SVG set",
+            "Bilingual README integration",
+            "Documentation tests",
+            "Browser visual QA",
+            "GitHub publication",
+        ]:
+            self.assertIn(text, markdown)
+
+    def test_visual_architecture_html_has_export_and_flow(self):
+        html = README_VISUAL_ARCHITECTURE_HTML.read_text(encoding="utf-8")
+        parser = _DocumentParser()
+        parser.feed(html)
+        self.assertIn("report-container", parser.ids)
+        for text in [
+            "Frozen Contracts",
+            "ImageGen Hero",
+            "5 Deterministic SVGs",
+            "Bilingual READMEs",
+            "Stdlib Tests",
+            "Browser Visual QA",
+            "Manual Push Gate",
+            "GitHub main + CI",
+            "Public README",
+            "Installed runtime bundle stays unchanged",
+            "function copyAsImage",
+            "function downloadPNG",
+            "function downloadPDF",
+        ]:
+            self.assertIn(text, html)
+        self.assertEqual(
+            [
+                "https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js",
+                "https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js",
+            ],
+            parser.scripts,
+        )
+
+
 class PublicDocsTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -93,7 +201,10 @@ class PublicDocsTests(unittest.TestCase):
             "docs/cases/independent-write-lanes.md",
             "docs/cases/shared-hotspot-serial.md",
             "docs/runtime-surface-matrix.md",
+            "docs/architecture/readme-visual-polish-architecture.md",
+            "docs/architecture/readme-visual-polish-architecture.html",
             "tests/evidence-template.md",
+            *README_IMAGE_TARGETS,
         ]
         for relative in required:
             self.assertTrue((ROOT / relative).is_file(), relative)
@@ -145,6 +256,66 @@ class PublicDocsTests(unittest.TestCase):
         self.assertIn("`SERIAL`", serial)
         self.assertIn("Shared writable path", serial)
 
+    def test_bilingual_readmes_share_visual_manifest_and_captions(self):
+        english = _readme_image_entries(README)
+        chinese = _readme_image_entries(README_ZH)
+        self.assertEqual(6, len(english))
+        self.assertEqual(6, len(chinese))
+        self.assertEqual(README_IMAGE_TARGETS, [entry[1] for entry in english])
+        self.assertEqual(README_IMAGE_TARGETS, [entry[1] for entry in chinese])
+        self.assertEqual(6, len({entry[0] for entry in english}))
+        self.assertEqual(6, len({entry[0] for entry in chinese}))
+        for ordinal, (english_entry, chinese_entry) in enumerate(
+            zip(english, chinese), start=1
+        ):
+            self.assertTrue(english_entry[0].strip())
+            self.assertTrue(chinese_entry[0].strip())
+            self.assertRegex(english_entry[2], rf"^\*Figure {ordinal}\. .+\*$")
+            self.assertRegex(chinese_entry[2], rf"^\*图 {ordinal}：.+\*$")
+        for document in [self.readme, self.readme_zh]:
+            self.assertIn(
+                "docs/architecture/oss-launch-architecture.md", document
+            )
+            self.assertIn(
+                "docs/architecture/oss-launch-architecture.html", document
+            )
+
+    def test_readme_visual_assets_are_local_and_safe(self):
+        for document in [README, README_ZH]:
+            for _, target, _ in _readme_image_entries(document):
+                self.assertFalse(target.startswith(("http://", "https://", "data:")))
+                self.assertFalse(Path(target).is_absolute())
+                resolved = (document.parent / target).resolve()
+                try:
+                    resolved.relative_to(README_ASSET_DIR.resolve())
+                except ValueError as error:
+                    self.fail(f"asset escapes docs/assets/readme: {target}: {error}")
+                self.assertTrue(resolved.is_file(), target)
+
+        hero = ROOT / README_IMAGE_TARGETS[0]
+        self.assertLess(hero.stat().st_size, 300_000)
+        self.assertEqual((1600, 900), _webp_dimensions(hero))
+
+        forbidden_elements = {"script", "image", "foreignObject"}
+        for relative in README_IMAGE_TARGETS[1:]:
+            path = ROOT / relative
+            self.assertLess(path.stat().st_size, 100_000)
+            root = ET.parse(path).getroot()
+            self.assertTrue(root.get("viewBox"), relative)
+            direct_tags = [child.tag.rsplit("}", 1)[-1] for child in list(root)[:2]]
+            self.assertEqual(["title", "desc"], direct_tags, relative)
+            for node in root.iter():
+                tag = node.tag.rsplit("}", 1)[-1]
+                self.assertNotIn(tag, forbidden_elements, relative)
+                for key, value in node.attrib.items():
+                    local_key = key.rsplit("}", 1)[-1]
+                    self.assertFalse(local_key.lower().startswith("on"), relative)
+                    if local_key in {"href", "src"}:
+                        self.assertFalse(
+                            value.startswith(("http://", "https://", "data:")),
+                            relative,
+                        )
+
     def test_relative_markdown_links_resolve(self):
         documents = [
             README,
@@ -189,7 +360,17 @@ class PublicDocsTests(unittest.TestCase):
             re.compile(r"base_url\s*=", re.IGNORECASE),
             re.compile(r"codex-silliter", re.IGNORECASE),
         ]
-        suffixes = {".md", ".py", ".sh", ".yaml", ".yml", ".json", ".txt"}
+        suffixes = {
+            ".html",
+            ".md",
+            ".py",
+            ".sh",
+            ".svg",
+            ".yaml",
+            ".yml",
+            ".json",
+            ".txt",
+        }
         for relative in candidates:
             if relative in {"tests/test_contract.py", "tests/test_docs.py"}:
                 continue
