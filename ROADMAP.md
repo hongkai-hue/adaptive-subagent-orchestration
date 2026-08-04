@@ -2,8 +2,8 @@
 
 ## Current stage
 
-The `v0.1.0` open-source Release Candidate passed integration and independent QA. The
-manual publication gate is approved, and public repository creation and verification are
+The `v0.1.0` open-source Release Candidate passed integration, independent QA, the public
+GitHub Actions matrix, and a full fresh-clone lifecycle Gate. Tag and Release creation are
 in progress.
 
 ## Completed and verified
@@ -22,12 +22,10 @@ in progress.
 
 ## In progress
 
-- Create the approved clean public history without attaching the internal repository.
-- Run GitHub Actions and fresh-clone lifecycle verification against the public repository.
+- Create the `v0.1.0` tag and GitHub Release from the verified public candidate.
 
 ## Next
 
-- Publish `v0.1.0` only after public CI and fresh-clone Gates pass.
 - Record the public repository and Release evidence after online verification.
 - Collect additional sanitized App/CLI evidence before expanding support claims.
 

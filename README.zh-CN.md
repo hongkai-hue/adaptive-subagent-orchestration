@@ -2,7 +2,7 @@
 
 这个 skill 把中等规模的 Codex 任务路由到最小且有价值的车道集合，为每个可写路径固定一个全程 owner，并要求主线程用证据完成最终 Gate。本仓库是 skill、UI 元数据、生命周期脚本、测试和公开文档的 canonical source；它不是调度器，也不替代 Codex runtime。
 
-**当前支持状态：** v0.1 候选版本，尚未发布。标准库契约测试覆盖静态规则、生命周期和若干前向用例；脱敏前向记录覆盖代表性的路由和结果回收。完整的 App／CLI 与操作系统覆盖、隐式触发和请求级 runtime identity 仍是未验证状态，详见 [运行面矩阵](docs/runtime-surface-matrix.md)。
+**当前支持状态：** v0.1.0 已具备发布条件。Public 仓库、GitHub Actions 矩阵和公网 fresh-clone 生命周期 Gate 已通过，剩余步骤是创建版本 tag 与 Release。标准库契约测试覆盖静态规则、生命周期和若干前向用例；脱敏前向记录覆盖代表性的路由和结果回收。完整的 App／CLI 与操作系统覆盖、隐式触发和请求级 runtime identity 仍是未验证状态，详见 [运行面矩阵](docs/runtime-surface-matrix.md)。
 
 ## 它解决什么
 
@@ -112,7 +112,7 @@ python3 -m compileall -q scripts
 git diff --check
 ```
 
-贡献、漏洞报告和行为规范见 [CONTRIBUTING.md](CONTRIBUTING.md)、[SECURITY.md](SECURITY.md) 与 [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)。拟议的 v0.1 license 是 Apache-2.0；最终 license 和公开发布仍由维护者通过手工 Gate 决定。拟议仓库坐标为 `https://github.com/hongkai-hue/adaptive-subagent-orchestration`，不代表已经发布。
+贡献、漏洞报告和行为规范见 [CONTRIBUTING.md](CONTRIBUTING.md)、[SECURITY.md](SECURITY.md) 与 [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)。项目采用 Apache-2.0，并发布在 `https://github.com/hongkai-hue/adaptive-subagent-orchestration`。
 
 ## 目录说明
 

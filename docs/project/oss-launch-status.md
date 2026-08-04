@@ -14,8 +14,8 @@ Last verified: 2026-08-04T16:00:00+08:00
 | OSS-07 | accepted | A0 | 29/29 tests; quick_validate; source/compile/shell/YAML/license/privacy/diff Gates PASS | 1 | A0 | none |
 | OSS-08 | accepted | QA/A0 | 29/29 independent PASS; final status clean of temp paths; fresh-copy lifecycle PASS | 2 | closed | none |
 | OSS-09 | accepted | user/A0 | explicit approval: `hongkai-hue/adaptive-subagent-orchestration`, Public, Apache-2.0, clean noreply history | 1 | none | none |
-| OSS-10 | in_progress | A0 | authenticated account and absent target repository verified | 1 | A0 | create clean public history, repository, and run public Gates |
-| OSS-11 | not_started | A0/QA | none | 0 | none | blocked by OSS-10 |
+| OSS-10 | accepted | A0 | Public/main/Apache-2.0 verified; 3/3 Actions jobs PASS; public fresh-clone 29/29 and lifecycle PASS | 1 | A0 | none |
+| OSS-11 | in_progress | A0/QA | release-ready wording committed after public Gates | 1 | A0 | rerun CI, tag `v0.1.0`, create and verify Release |
 
 ## State Rules
 

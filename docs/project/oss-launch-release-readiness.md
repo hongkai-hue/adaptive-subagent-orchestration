@@ -4,9 +4,9 @@ Last verified: 2026-08-04
 
 ## Decision
 
-**Local Release Candidate ready; the manual publication gate is approved and public
-repository verification is in progress.** The approval covers creation and push of the
-clean public repository, the `v0.1.0` tag, and the GitHub Release. External promotion is
+**The public Release Candidate is verified and release packaging is in progress.** The
+clean Public repository, GitHub Actions matrix, and fresh-clone lifecycle Gate have
+passed. The approval covers the `v0.1.0` tag and GitHub Release. External promotion is
 still outside this Flow.
 
 The public candidate must use a new clean history. The existing internal root commit
@@ -90,7 +90,7 @@ is `NOT_RUN_NO_PERSISTENT_SERVICE`.
 - A natural-language skill cannot enforce OS-level file locks or deterministic host
   behavior.
 - Implicit invocation and exact runtime identity remain unverified.
-- Public CI has not run until the remote repository exists.
+- GitHub Actions passed on macOS with Python 3.12 and Ubuntu with Python 3.9 and 3.12.
 - Windows lifecycle support is outside v0.1.
 - Existing internal Git history is private-only and must not be attached to the public
   remote.
@@ -123,5 +123,5 @@ With OSS-09 explicitly approved:
 
 ## Final Gate
 
-The local Release Candidate and manual publication gate are accepted. The overall online
-goal remains in progress until OSS-10 and OSS-11 complete.
+The local and public Release Candidate Gates are accepted. The overall online goal remains
+in progress until OSS-11 completes.

@@ -2,7 +2,7 @@
 
 Route a medium Codex task to the smallest useful set of lanes, keep one owner for each writable path, and finish with evidence that the parent agent can verify. This repository is the canonical source for the skill, its UI metadata, lifecycle scripts, tests, and public guidance. It is a workflow contract, not a scheduler or a replacement for the Codex runtime.
 
-**Current support status:** pre-release v0.1 candidate. Static contracts, lifecycle behavior, and selected forward cases are covered by the repository tests. A sanitized desktop forward record covers representative routing and result collection. Complete App/CLI and OS coverage, implicit triggering, and request-level runtime identity remain unverified; see the [runtime surface matrix](docs/runtime-surface-matrix.md).
+**Current support status:** v0.1.0 release-ready. The public repository, GitHub Actions matrix, and fresh-clone lifecycle Gate have passed; the version tag and Release are the remaining publication steps. Static contracts, lifecycle behavior, and selected forward cases are covered by the repository tests. A sanitized desktop forward record covers representative routing and result collection. Complete App/CLI and OS coverage, implicit triggering, and request-level runtime identity remain unverified; see the [runtime surface matrix](docs/runtime-surface-matrix.md).
 
 ## What changes
 
@@ -116,7 +116,7 @@ python3 -m compileall -q scripts
 git diff --check
 ```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) before opening a change. The proposed v0.1 license is Apache-2.0; the final license and publication decision remain an explicit manual gate owned by the maintainer. The proposed repository coordinate is `https://github.com/hongkai-hue/adaptive-subagent-orchestration` and is not a publication confirmation.
+See [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) before opening a change. The project is published under Apache-2.0 at `https://github.com/hongkai-hue/adaptive-subagent-orchestration`.
 
 ## Repository map
 
