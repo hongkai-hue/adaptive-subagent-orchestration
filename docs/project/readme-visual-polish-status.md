@@ -1,6 +1,6 @@
 # README Visual Polish Status
 
-Last verified: 2026-08-04T17:08:50+08:00
+Last verified: 2026-08-04T17:16:35+08:00
 
 | Node | State | Owner | Evidence | Attempts | Lease / agent | Blocker / next action |
 | --- | --- | --- | --- | ---: | --- | --- |
@@ -12,7 +12,7 @@ Last verified: 2026-08-04T17:08:50+08:00
 | RVP-05 | accepted | A0 | standard-library asset, architecture, manifest, caption, link, and privacy tests PASS | 1 | A0 | none |
 | RVP-06 | accepted | A0 | both READMEs contain the same six local assets in the frozen order with localized alt/captions | 1 | A0 | none |
 | RVP-07 | accepted | A0/QA | GFM desktop light/dark and 390 px mobile PASS; source + 33/33 tests + compile/shell/diff Gates PASS; independent QA PASS | 1 | `/root/rvp_final_qa` | none |
-| RVP-08 | waiting_for_manual_gate | user/A0 | target public repo/main recorded | 0 | none | explicit push confirmation after local RC |
+| RVP-08 | accepted | user/A0 | public content commit `04487d8`; CI run `30895434940` PASS; both READMEs and all six assets HTTP 200; live GitHub render shows six complete images | 1 | none | none |
 
 ## State Rules
 
@@ -33,3 +33,4 @@ Last verified: 2026-08-04T17:08:50+08:00
 - Drift found: only the README visual candidate and its Flow evidence created by A0
 - Latest local Gate: `./scripts/validate.sh .` PASS; recursive tests 33/33 PASS; Python compile, shell syntax, and diff check PASS
 - Optional system `quick_validate.py`: not run because its undeclared local `PyYAML` dependency is absent; no dependency was installed
+- Public recovery point: revert content commit `04487d8` with a normal follow-up commit; never rewrite public history

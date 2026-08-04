@@ -161,7 +161,7 @@ flowchart LR
 
 ### RVP-08 Manual Public Push + Online QA
 
-- State: waiting_for_manual_gate
+- State: accepted
 - Owner: user/A0
 - Wave: W6
 - Depends on: RVP-07
@@ -187,16 +187,16 @@ flowchart LR
 
 ## Manual Gates
 
-RVP-08 stops before `git push`. It records the repository/branch, diff, local QA, risk, and
-rollback path. Explicit confirmation releases only a normal push to
-`hongkai-hue/adaptive-subagent-orchestration` `main`; it does not authorize force push,
-tag/Release changes, or external promotion.
+RVP-08 stopped before `git push` and recorded the repository/branch, diff, local QA, risk, and
+rollback path. Explicit confirmation released only a normal push to
+`hongkai-hue/adaptive-subagent-orchestration` `main`; no force push, tag/Release change, or
+external promotion occurred.
 
 ## Conditions And Cancellation
 
 - RVP-06 is cancelled if an asset node is removed; otherwise it waits for all dependencies.
-- RVP-08 stays `waiting_for_manual_gate` without authorization; local work may still become
-  an accepted Release Candidate.
+- RVP-08 stayed `waiting_for_manual_gate` until explicit authorization, then required successful
+  CI and unauthenticated public verification before acceptance.
 - Any upstream artifact change invalidates browser/regression evidence and moves RVP-07 and
   RVP-08 back to `needs_rework`/`waiting_for_manual_gate`.
 - The graph is acyclic; false conditions cancel only their dependent branch.

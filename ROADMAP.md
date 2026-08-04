@@ -2,8 +2,9 @@
 
 ## Current stage
 
-The `v0.1.0` open-source release is online. A six-image bilingual README enhancement is a
-verified local Release Candidate and is paused at the explicit public-push Gate.
+The `v0.1.0` open-source release and the six-image bilingual README enhancement are online.
+The public content commit, GitHub Actions matrix, both READMEs, all six assets, and the live
+GitHub render are verified.
 
 ## Completed and verified
 
@@ -18,22 +19,20 @@ verified local Release Candidate and is paused at the explicit public-push Gate.
   contract, and a runtime surface matrix are present.
 - Contract, lifecycle, architecture, documentation, link, and privacy tests run through
   recursive standard-library discovery.
-- The README visual candidate contains one inspected ImageGen WebP, five accessible deterministic
+- The published README visual set contains one inspected ImageGen WebP, five accessible deterministic
   SVGs, localized alt/captions in both READMEs, and an interactive visual architecture.
 - GitHub-flavored Markdown previews passed desktop light/dark inspection and actual 390 px mobile
-  overflow checks; source validation and the expanded 33-test recursive suite pass locally.
+  overflow checks; the live public README loads all six images without horizontal overflow.
+- Source validation, the expanded 33-test recursive suite, and the three-job GitHub Actions matrix
+  pass; unauthenticated requests to both READMEs and all six image assets return HTTP 200.
 
 ## In progress
 
-- Await explicit authorization for a normal documentation-only push to the existing public
-  `main`; no tag or GitHub Release change is planned.
+- Collect additional sanitized App/CLI evidence before expanding support claims.
 
 ## Next
 
-- After authorization, transfer the candidate through a fresh public clone, wait for GitHub
-  Actions, and verify both public READMEs and all six unauthenticated asset URLs.
 - Evaluate post-release feedback without expanding the v0.1 support claim prematurely.
-- Collect additional sanitized App/CLI evidence before expanding support claims.
 
 ## Known limitations
 
