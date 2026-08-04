@@ -1,0 +1,24 @@
+name: Feature request
+description: Propose a focused change to the public contract.
+title: "[Feature]: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: Which current routing or lifecycle limitation needs to change?
+    validations:
+      required: true
+  - type: textarea
+    id: contract
+    attributes:
+      label: Proposed contract change
+      description: Describe inputs, outputs, failure behavior, and an independent Gate.
+    validations:
+      required: true
+  - type: textarea
+    id: non_goals
+    attributes:
+      label: Non-goals
+      description: State what should remain outside this skill.

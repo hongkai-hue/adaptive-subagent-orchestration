@@ -1,0 +1,33 @@
+name: Bug report
+description: Report reproducible routing, lifecycle, or documentation behavior.
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Do not include credentials, private paths, provider routes, account data, or private logs.
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Observed outcome
+      description: What happened, and what did you expect instead?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Safe reproduction
+      description: Provide a minimal public fixture, exact command, and exit code.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Sanitized evidence
+      description: Include changed paths and Gate output without private runtime data.

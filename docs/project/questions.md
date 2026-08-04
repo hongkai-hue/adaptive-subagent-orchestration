@@ -1,0 +1,7 @@
+# Questions
+
+| ID | Status | Class | Node | Affected branch | Question | Default decision | Adopted at | Answer | Impact |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Q-OSS-001 | answered | blocking | OSS-09 | OSS-09, OSS-10, OSS-11 | Confirm the exact GitHub account, repository name, visibility, license, and history policy before publication. | `hongkai-hue/adaptive-subagent-orchestration`, public, Apache-2.0, and a new clean one-commit public history; never push the internal history. | 2026-08-04 / user confirmation | Approved exactly as the default decision, using a GitHub noreply author. | Unblocks repository creation, public verification, tag, and Release. |
+| Q-OSS-002 | open | non_blocking | OSS-03 | OSS-04, OSS-06 | Should the runtime `SKILL.md` use English as its canonical public language? | Use concise English runtime instructions and provide a complete Chinese README. | 2026-08-04 / active task |  | Confined to runtime wording and docs; routing contract remains unchanged. |
+| Q-OSS-003 | open | non_blocking | OSS-06 | OSS-06, OSS-07 | Which surfaces should v0.1 claim as tested? | Claim only environments actually exercised during this Flow; document other surfaces as unverified. | 2026-08-04 / active task |  | Prevents unsupported compatibility claims. |

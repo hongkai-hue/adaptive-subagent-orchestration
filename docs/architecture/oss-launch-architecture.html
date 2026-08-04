@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adaptive Subagent Orchestration OSS Architecture</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" integrity="sha384-ZZ1pncU3bQe8y31yfZdMFdSpttDoPmOZg2wguVK9almUodir1PghgT0eY7Mrty8H" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js" integrity="sha384-en/ztfPSRkGfME4KIm05joYXynqzUgbsG5nMrj/xEFAHXkeZfO3yMK8QQ+mP7p1/" crossorigin="anonymous"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'JetBrains Mono', monospace;
+      background: #020617;
+      min-height: 100vh;
+      padding: 2rem;
+      color: white;
+    }
+    .container { max-width: 1200px; margin: 0 auto; }
+    .header { margin-bottom: 2rem; }
+    .header-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem; }
+    .pulse-dot { width: 12px; height: 12px; background: #22d3ee; border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.025em; }
+    .subtitle { color: #94a3b8; font-size: 0.875rem; margin-left: 1.75rem; }
+    .diagram-container { background: rgba(15, 23, 42, 0.5); border-radius: 1rem; border: 1px solid #1e293b; padding: 1.5rem; overflow-x: auto; }
+    svg { width: 100%; min-width: 900px; display: block; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-top: 2rem; }
+    .card { background: rgba(15, 23, 42, 0.5); border-radius: 0.75rem; border: 1px solid #1e293b; padding: 1.25rem; }
+    .card-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; }
+    .card-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .card-dot.cyan { background: #22d3ee; }
+    .card-dot.emerald { background: #34d399; }
+    .card-dot.violet { background: #a78bfa; }
+    .card h3 { font-size: 0.875rem; font-weight: 600; }
+    .card ul { list-style: none; color: #94a3b8; font-size: 0.75rem; }
+    .card li { margin-bottom: 0.375rem; }
+    .footer { text-align: center; margin-top: 1.5rem; color: #475569; font-size: 0.75rem; }
+    .toolbar { display: flex; gap: 0.5rem; margin-left: auto; flex-shrink: 0; align-items: center; }
+    .toolbar-toggle { background: transparent; border: none; color: #475569; cursor: pointer; font-size: 1.25rem; line-height: 1; padding: 0.25rem 0.5rem; border-radius: 0.375rem; transition: color 0.2s, background 0.2s; }
+    .toolbar-toggle:hover { color: #94a3b8; background: rgba(30, 41, 59, 0.5); }
+    .toolbar-actions { display: none; gap: 0.5rem; }
+    .toolbar.expanded .toolbar-actions { display: flex; }
+    .toolbar-actions button { background: rgba(30, 41, 59, 0.8); border: 1px solid #334155; color: #94a3b8; padding: 0.375rem 0.75rem; border-radius: 0.375rem; font-family: inherit; font-size: 0.75rem; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+    .toolbar-actions button:hover { background: rgba(51, 65, 85, 0.8); color: white; border-color: #475569; }
+    @media print { body { background: #020617; padding: 1rem; } .toolbar { display: none !important; } }
+  </style>
+</head>
+<body>
+  <div class="container" id="report-container">
+    <div class="header">
+      <div class="header-row">
+        <div class="pulse-dot"></div>
+        <h1>Adaptive Subagent Orchestration · OSS Architecture</h1>
+        <div class="toolbar">
+          <div class="toolbar-actions">
+            <button onclick="copyAsImage(this)">📋 Copy</button>
+            <button onclick="downloadPNG(this)">🖼️ PNG</button>
+            <button onclick="downloadPDF(this)">📄 PDF</button>
+          </div>
+          <button class="toolbar-toggle" onclick="this.parentElement.classList.toggle('expanded')" title="Export options" aria-label="Export options">⋯</button>
+        </div>
+      </div>
+      <p class="subtitle">A provider-neutral routing contract, a safe lifecycle, and evidence-gated public releases</p>
+    </div>
+
+    <div class="diagram-container">
+      <svg viewBox="0 0 1000 700" role="img" aria-labelledby="diagram-title diagram-desc">
+        <title id="diagram-title">Open-source skill architecture and trust boundaries</title>
+        <desc id="diagram-desc">Source repository validates and installs a minimal skill bundle. Codex discovers the bundle, routes tasks, delegates bounded lanes, and returns evidence to the parent. GitHub publication remains behind a manual gate.</desc>
+        <defs>
+          <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#64748b" />
+          </marker>
+          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" stroke-width="0.5"/>
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#grid)" />
+
+        <!-- Connections render before boxes. -->
+        <line x1="175" y1="192" x2="265" y2="192" stroke="#22d3ee" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <line x1="425" y1="192" x2="515" y2="192" stroke="#34d399" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <line x1="675" y1="192" x2="765" y2="192" stroke="#a78bfa" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <line x1="845" y1="232" x2="845" y2="342" stroke="#22d3ee" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <line x1="765" y1="382" x2="675" y2="382" stroke="#34d399" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <line x1="515" y1="382" x2="425" y2="382" stroke="#34d399" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path d="M 345 422 L 345 470 Q 345 490 365 490 L 500 490 Q 520 490 520 510 L 520 577 L 523 577" fill="none" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <line x1="635" y1="577" x2="673" y2="577" stroke="#fbbf24" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path d="M 345 152 L 345 90 Q 345 70 365 70 L 700 70 Q 720 70 720 90 L 720 145" fill="none" stroke="#fb7185" stroke-width="1.5" stroke-dasharray="5,5" marker-end="url(#arrowhead)"/>
+
+        <text x="220" y="183" fill="#94a3b8" font-size="8" text-anchor="middle">validate</text>
+        <text x="470" y="183" fill="#94a3b8" font-size="8" text-anchor="middle">install</text>
+        <text x="720" y="183" fill="#94a3b8" font-size="8" text-anchor="middle">discover</text>
+        <text x="860" y="290" fill="#94a3b8" font-size="8">route</text>
+        <text x="720" y="373" fill="#94a3b8" font-size="8" text-anchor="middle">delegate</text>
+        <text x="470" y="373" fill="#94a3b8" font-size="8" text-anchor="middle">evidence</text>
+        <text x="430" y="482" fill="#94a3b8" font-size="8" text-anchor="middle">release candidate</text>
+        <text x="654" y="568" fill="#fbbf24" font-size="8" text-anchor="middle">approve</text>
+        <text x="550" y="62" fill="#fb7185" font-size="8" text-anchor="middle">no credentials, provider routes, or private config</text>
+
+        <!-- Public source boundary. -->
+        <rect x="25" y="110" width="420" height="350" rx="12" fill="rgba(251, 191, 36, 0.05)" stroke="#fbbf24" stroke-width="1" stroke-dasharray="8,4"/>
+        <text x="40" y="130" fill="#fbbf24" font-size="10" font-weight="600">PUBLIC SOURCE REPOSITORY</text>
+
+        <rect x="45" y="152" width="130" height="80" rx="6" fill="#0f172a"/>
+        <rect x="45" y="152" width="130" height="80" rx="6" fill="rgba(8, 51, 68, 0.4)" stroke="#22d3ee" stroke-width="1.5"/>
+        <text x="110" y="178" fill="white" font-size="11" font-weight="600" text-anchor="middle">Runtime Skill</text>
+        <text x="110" y="197" fill="#94a3b8" font-size="8" text-anchor="middle">SKILL.md</text>
+        <text x="110" y="212" fill="#94a3b8" font-size="8" text-anchor="middle">agents/openai.yaml</text>
+
+        <rect x="265" y="152" width="160" height="80" rx="6" fill="#0f172a"/>
+        <rect x="265" y="152" width="160" height="80" rx="6" fill="rgba(6, 78, 59, 0.4)" stroke="#34d399" stroke-width="1.5"/>
+        <text x="345" y="178" fill="white" font-size="11" font-weight="600" text-anchor="middle">Contract + CI</text>
+        <text x="345" y="197" fill="#94a3b8" font-size="8" text-anchor="middle">fixtures · tests · privacy</text>
+        <text x="345" y="212" fill="#34d399" font-size="8" text-anchor="middle">required Gates</text>
+
+        <rect x="265" y="342" width="160" height="80" rx="6" fill="#0f172a"/>
+        <rect x="265" y="342" width="160" height="80" rx="6" fill="rgba(6, 78, 59, 0.4)" stroke="#34d399" stroke-width="1.5"/>
+        <text x="345" y="368" fill="white" font-size="11" font-weight="600" text-anchor="middle">Lifecycle</text>
+        <text x="345" y="387" fill="#94a3b8" font-size="8" text-anchor="middle">dry-run · manifest · backup</text>
+        <text x="345" y="402" fill="#94a3b8" font-size="8" text-anchor="middle">validate · uninstall</text>
+
+        <rect x="45" y="342" width="130" height="80" rx="6" fill="#0f172a"/>
+        <rect x="45" y="342" width="130" height="80" rx="6" fill="rgba(30, 41, 59, 0.5)" stroke="#94a3b8" stroke-width="1.5"/>
+        <text x="110" y="368" fill="white" font-size="11" font-weight="600" text-anchor="middle">Docs + Cases</text>
+        <text x="110" y="387" fill="#94a3b8" font-size="8" text-anchor="middle">README · governance</text>
+        <text x="110" y="402" fill="#94a3b8" font-size="8" text-anchor="middle">sanitized evidence</text>
+
+        <!-- Local Codex boundary. -->
+        <rect x="485" y="110" width="490" height="350" rx="12" fill="rgba(167, 139, 250, 0.04)" stroke="#a78bfa" stroke-width="1" stroke-dasharray="8,4"/>
+        <text x="500" y="130" fill="#a78bfa" font-size="10" font-weight="600">LOCAL CODEX ENVIRONMENT</text>
+
+        <rect x="515" y="152" width="160" height="80" rx="6" fill="#0f172a"/>
+        <rect x="515" y="152" width="160" height="80" rx="6" fill="rgba(76, 29, 149, 0.4)" stroke="#a78bfa" stroke-width="1.5"/>
+        <text x="595" y="178" fill="white" font-size="11" font-weight="600" text-anchor="middle">Installed Bundle</text>
+        <text x="595" y="197" fill="#94a3b8" font-size="8" text-anchor="middle">2 runtime files</text>
+        <text x="595" y="212" fill="#a78bfa" font-size="8" text-anchor="middle">checksum manifest</text>
+
+        <rect x="765" y="152" width="160" height="80" rx="6" fill="#0f172a"/>
+        <rect x="765" y="152" width="160" height="80" rx="6" fill="rgba(8, 51, 68, 0.4)" stroke="#22d3ee" stroke-width="1.5"/>
+        <text x="845" y="178" fill="white" font-size="11" font-weight="600" text-anchor="middle">Parent Codex</text>
+        <text x="845" y="197" fill="#94a3b8" font-size="8" text-anchor="middle">requirements · decisions</text>
+        <text x="845" y="212" fill="#22d3ee" font-size="8" text-anchor="middle">final verification</text>
+
+        <rect x="765" y="342" width="160" height="80" rx="6" fill="#0f172a"/>
+        <rect x="765" y="342" width="160" height="80" rx="6" fill="rgba(8, 51, 68, 0.4)" stroke="#22d3ee" stroke-width="1.5"/>
+        <text x="845" y="368" fill="white" font-size="11" font-weight="600" text-anchor="middle">L0–L3 Router</text>
+        <text x="845" y="387" fill="#94a3b8" font-size="8" text-anchor="middle">no delegation · explorers</text>
+        <text x="845" y="402" fill="#94a3b8" font-size="8" text-anchor="middle">isolated workers · handoff</text>
+
+        <rect x="515" y="342" width="160" height="80" rx="6" fill="#0f172a"/>
+        <rect x="515" y="342" width="160" height="80" rx="6" fill="rgba(6, 78, 59, 0.4)" stroke="#34d399" stroke-width="1.5"/>
+        <text x="595" y="368" fill="white" font-size="11" font-weight="600" text-anchor="middle">Bounded Agents</text>
+        <text x="595" y="387" fill="#94a3b8" font-size="8" text-anchor="middle">one file · one owner</text>
+        <text x="595" y="402" fill="#34d399" font-size="8" text-anchor="middle">structured evidence</text>
+
+        <!-- GitHub boundary and gate. -->
+        <rect x="500" y="500" width="450" height="145" rx="12" fill="rgba(251, 191, 36, 0.05)" stroke="#fb7185" stroke-width="1" stroke-dasharray="6,4"/>
+        <text x="515" y="520" fill="#fb7185" font-size="10" font-weight="600">PUBLICATION TRUST BOUNDARY</text>
+        <rect x="675" y="545" width="220" height="65" rx="6" fill="#0f172a"/>
+        <rect x="675" y="545" width="220" height="65" rx="6" fill="rgba(120, 53, 15, 0.3)" stroke="#fbbf24" stroke-width="1.5"/>
+        <text x="785" y="571" fill="white" font-size="11" font-weight="600" text-anchor="middle">GitHub Repository + Release</text>
+        <text x="785" y="590" fill="#fbbf24" font-size="8" text-anchor="middle">fresh-clone Gate after push</text>
+        <rect x="525" y="545" width="110" height="65" rx="6" fill="#0f172a"/>
+        <rect x="525" y="545" width="110" height="65" rx="6" fill="rgba(136, 19, 55, 0.4)" stroke="#fb7185" stroke-width="1.5"/>
+        <text x="580" y="571" fill="white" font-size="10" font-weight="600" text-anchor="middle">Manual Gate</text>
+        <text x="580" y="590" fill="#fb7185" font-size="8" text-anchor="middle">account · license</text>
+
+        <!-- Legend below all boundaries. -->
+        <text x="35" y="665" fill="white" font-size="9" font-weight="600">Legend</text>
+        <rect x="95" y="655" width="16" height="10" rx="2" fill="rgba(8, 51, 68, 0.4)" stroke="#22d3ee"/>
+        <text x="118" y="664" fill="#94a3b8" font-size="8">runtime</text>
+        <rect x="190" y="655" width="16" height="10" rx="2" fill="rgba(6, 78, 59, 0.4)" stroke="#34d399"/>
+        <text x="213" y="664" fill="#94a3b8" font-size="8">verification</text>
+        <rect x="315" y="655" width="16" height="10" rx="2" fill="rgba(76, 29, 149, 0.4)" stroke="#a78bfa"/>
+        <text x="338" y="664" fill="#94a3b8" font-size="8">installed artifact</text>
+        <line x1="465" y1="660" x2="485" y2="660" stroke="#fb7185" stroke-dasharray="4,4"/>
+        <text x="493" y="664" fill="#94a3b8" font-size="8">manual/security boundary</text>
+      </svg>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-header"><div class="card-dot cyan"></div><h3>Runtime boundary</h3></div>
+        <ul><li>• Routing contract, not a scheduler</li><li>• No provider or account configuration</li><li>• Parent owns decisions and final Gate</li></ul>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-dot emerald"></div><h3>Distribution boundary</h3></div>
+        <ul><li>• Dry-run and explicit target</li><li>• Checksummed owned-file manifest</li><li>• Backup before replacement</li></ul>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-dot violet"></div><h3>Release boundary</h3></div>
+        <ul><li>• Required local QA first</li><li>• User-authorized remote mutation</li><li>• Fresh public clone proves release</li></ul>
+      </div>
+    </div>
+    <p class="footer">Adaptive Subagent Orchestration · OSS launch contract v1 · 2026-08-04</p>
+  </div>
+
+  <script>
+    async function copyAsImage(btn) {
+      const orig = btn.textContent;
+      try {
+        const el = document.getElementById('report-container');
+        const r = el.getBoundingClientRect();
+        const pad = 32;
+        const canvas = await html2canvas(document.body, { backgroundColor: '#020617', scale: 2, useCORS: true, ignoreElements: (e) => e.classList && e.classList.contains('toolbar'), x: r.left + window.scrollX - pad, y: r.top + window.scrollY - pad, width: r.width + pad * 2, height: r.height + pad * 2 });
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+        await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+        btn.textContent = '✓ Copied!';
+      } catch (e) { btn.textContent = '✗ Failed'; }
+      setTimeout(() => btn.textContent = orig, 2000);
+    }
+    async function downloadPNG(btn) {
+      const orig = btn.textContent;
+      btn.textContent = '⏳ ...';
+      try {
+        const el = document.getElementById('report-container');
+        const r = el.getBoundingClientRect();
+        const pad = 32;
+        const canvas = await html2canvas(document.body, { backgroundColor: '#020617', scale: 2, useCORS: true, ignoreElements: (e) => e.classList && e.classList.contains('toolbar'), x: r.left + window.scrollX - pad, y: r.top + window.scrollY - pad, width: r.width + pad * 2, height: r.height + pad * 2 });
+        const link = document.createElement('a');
+        link.download = 'adaptive-subagent-orchestration-architecture.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        btn.textContent = '✓ Done!';
+      } catch (e) { btn.textContent = '✗ Failed'; }
+      setTimeout(() => btn.textContent = orig, 2000);
+    }
+    async function downloadPDF(btn) {
+      const orig = btn.textContent;
+      btn.textContent = '⏳ ...';
+      try {
+        const el = document.getElementById('report-container');
+        const r = el.getBoundingClientRect();
+        const pad = 32;
+        const canvas = await html2canvas(document.body, { backgroundColor: '#020617', scale: 2, useCORS: true, ignoreElements: (e) => e.classList && e.classList.contains('toolbar'), x: r.left + window.scrollX - pad, y: r.top + window.scrollY - pad, width: r.width + pad * 2, height: r.height + pad * 2 });
+        const imgData = canvas.toDataURL('image/png');
+        const { jsPDF } = window.jspdf;
+        const orientation = canvas.width > canvas.height ? 'landscape' : 'portrait';
+        const pdf = new jsPDF({ orientation, unit: 'px', format: [canvas.width, canvas.height], hotfixes: ['px_scaling'] });
+        pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+        pdf.save('adaptive-subagent-orchestration-architecture.pdf');
+        btn.textContent = '✓ Done!';
+      } catch (e) { btn.textContent = '✗ Failed'; }
+      setTimeout(() => btn.textContent = orig, 2000);
+    }
+  </script>
+</body>
+</html>
