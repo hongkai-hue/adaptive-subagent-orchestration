@@ -84,8 +84,9 @@ codex_version: "..."
 surface: app | cli
 os: "..."
 scenario: "..."
-expected_route: L0 | L1 | L2 | L3 | SERIAL | BLOCKED
-observed_route: L0 | L1 | L2 | L3 | SERIAL | BLOCKED
+mode: balanced | compute-offload
+expected_route: L0 | D1 | L1 | L2 | L3 | SERIAL | BLOCKED
+observed_route: L0 | D1 | L1 | L2 | L3 | SERIAL | BLOCKED
 roles_requested: []
 runtime_identity: VERIFIED | UNVERIFIED
 owned_paths: {}
@@ -164,7 +165,10 @@ and repository. Tokens must not appear in command output, logs, manifests, or do
   is `.agents/skills`, matching current Codex documentation.
 - Existing private `~/.codex/skills` installs are not migrated automatically. A custom
   absolute target can be used only when explicitly requested.
-- Breaking manifest or routing-contract changes require a SemVer major release.
+- D1 is an opt-in additive route: `balanced` preserves the v0.1 routing behavior, while
+  `compute-offload` must be explicitly selected by a user or host policy.
+- Removing or redefining an existing route, or breaking the manifest contract, requires a
+  SemVer major release.
 - A future plugin may consume the same runtime files but cannot silently change this
   lifecycle contract.
 

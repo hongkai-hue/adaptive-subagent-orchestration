@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compute Offload Architecture</title>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" integrity="sha384-ZZ1pncU3bQe8y31yfZdMFdSpttDoPmOZg2wguVK9almUodir1PghgT0eY7Mrty8H" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js" integrity="sha384-en/ztfPSRkGfME4KIm05joYXynqzUgbsG5nMrj/xEFAHXkeZfO3yMK8QQ+mP7p1/" crossorigin="anonymous"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #020617; color: #f8fafc; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; min-height: 100vh; padding: 28px; }
+    .container { max-width: 1240px; margin: 0 auto; }
+    .header-row { display: flex; align-items: center; gap: 12px; }
+    .dot { width: 11px; height: 11px; border-radius: 50%; background: #22d3ee; box-shadow: 0 0 18px #22d3ee; }
+    h1 { font-size: 24px; letter-spacing: -0.03em; }
+    .subtitle { color: #94a3b8; font-size: 13px; margin: 8px 0 22px 23px; }
+    .toolbar { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+    .toolbar-actions { display: none; gap: 8px; }
+    .toolbar.expanded .toolbar-actions { display: flex; }
+    .toolbar button { background: #0f172a; border: 1px solid #334155; border-radius: 7px; color: #cbd5e1; cursor: pointer; font: inherit; font-size: 11px; padding: 7px 10px; }
+    .toolbar-toggle { color: #64748b !important; font-size: 18px !important; padding: 2px 9px !important; }
+    .diagram { background: rgba(15, 23, 42, .68); border: 1px solid #1e293b; border-radius: 16px; padding: 18px; overflow-x: auto; }
+    svg { display: block; min-width: 1050px; width: 100%; }
+    .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 18px; }
+    .card { background: rgba(15, 23, 42, .68); border: 1px solid #1e293b; border-radius: 12px; padding: 16px; }
+    .card h2 { font-size: 13px; margin-bottom: 9px; }
+    .card p, .card li { color: #94a3b8; font-size: 11px; line-height: 1.65; }
+    .card ul { list-style: none; }
+    .cyan { color: #22d3ee; } .emerald { color: #34d399; } .rose { color: #fb7185; }
+    .footer { color: #475569; font-size: 11px; margin-top: 16px; text-align: center; }
+    @media (max-width: 760px) { body { padding: 14px; } .cards { grid-template-columns: 1fr; } }
+    @media print { .toolbar { display: none !important; } }
+  </style>
+</head>
+<body>
+  <div class="container" id="report-container">
+    <header>
+      <div class="header-row">
+        <div class="dot"></div>
+        <h1>Compute Offload Architecture</h1>
+        <div class="toolbar">
+          <div class="toolbar-actions">
+            <button onclick="copyAsImage(this)">Copy PNG</button>
+            <button onclick="downloadPNG(this)">Download PNG</button>
+            <button onclick="downloadPDF(this)">Download PDF</button>
+          </div>
+          <button class="toolbar-toggle" onclick="this.parentElement.classList.toggle('expanded')" aria-label="Export options" title="Export options">⋯</button>
+        </div>
+      </div>
+      <p class="subtitle">Provider-neutral admission for balanced routing, D1 execution offload, bounded concurrency, and parent-owned evidence.</p>
+    </header>
+
+    <main class="diagram">
+      <svg viewBox="0 0 1180 700" role="img" aria-labelledby="diagram-title diagram-desc">
+        <title id="diagram-title">Compute offload routing and trust boundaries</title>
+        <desc id="diagram-desc">A public host policy selects balanced or compute-offload mode. Safety admission routes work to local parent execution, one bounded D1 worker, read-only or parallel lanes, or heavy handoff. Private role routing stays outside the repository and all evidence returns to the parent final Gate.</desc>
+        <defs>
+          <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M 32 0 L 0 0 0 32" fill="none" stroke="#1e293b" stroke-width="0.55"/></pattern>
+          <marker id="arrow" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0,9 3.5,0 7" fill="#64748b"/></marker>
+          <marker id="green-arrow" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><polygon points="0 0,9 3.5,0 7" fill="#34d399"/></marker>
+        </defs>
+        <rect width="1180" height="700" fill="url(#grid)"/>
+
+        <rect x="20" y="34" width="1140" height="420" rx="14" fill="rgba(34,211,238,.025)" stroke="#22d3ee" stroke-dasharray="8 5"/>
+        <text x="38" y="57" fill="#22d3ee" font-size="12" font-weight="700">PUBLIC WORKFLOW CONTRACT</text>
+        <rect x="20" y="486" width="1140" height="174" rx="14" fill="rgba(251,113,133,.025)" stroke="#fb7185" stroke-dasharray="8 5"/>
+        <text x="38" y="510" fill="#fb7185" font-size="12" font-weight="700">PRIVATE HOST BOUNDARY — NOT READ OR WRITTEN BY THE SKILL</text>
+
+        <g stroke="#64748b" stroke-width="1.7" fill="none" marker-end="url(#arrow)">
+          <line x1="160" y1="151" x2="228" y2="151"/>
+          <line x1="388" y1="151" x2="452" y2="151"/>
+          <line x1="632" y1="151" x2="700" y2="151"/>
+          <path d="M 790 198 L 790 248 L 150 248 L 150 292"/>
+          <path d="M 790 198 L 790 248 L 405 248 L 405 292"/>
+          <path d="M 790 198 L 790 248 L 670 248 L 670 292"/>
+          <path d="M 790 198 L 790 248 L 930 248 L 930 292"/>
+          <path d="M 790 198 L 790 248 L 1080 248 L 1080 292"/>
+          <path d="M 405 384 L 405 428 L 520 428"/>
+          <line x1="555" y1="384" x2="555" y2="518"/>
+          <line x1="670" y1="384" x2="670" y2="428"/>
+          <line x1="930" y1="384" x2="930" y2="428"/>
+        </g>
+
+        <rect x="40" y="104" width="120" height="94" rx="8" fill="#0f172a" stroke="#94a3b8" stroke-width="1.6"/>
+        <text x="100" y="133" fill="#fff" font-size="13" font-weight="700" text-anchor="middle">TASK</text>
+        <text x="100" y="154" fill="#94a3b8" font-size="10" text-anchor="middle">goal + project rules</text>
+        <text x="100" y="173" fill="#94a3b8" font-size="10" text-anchor="middle">authority + facts</text>
+
+        <rect x="230" y="104" width="158" height="94" rx="8" fill="#0f172a" stroke="#22d3ee" stroke-width="1.6"/>
+        <text x="309" y="132" fill="#fff" font-size="13" font-weight="700" text-anchor="middle">MODE POLICY</text>
+        <text x="309" y="154" fill="#22d3ee" font-size="10" text-anchor="middle">balanced (default)</text>
+        <text x="309" y="174" fill="#34d399" font-size="10" text-anchor="middle">compute-offload (opt-in)</text>
+
+        <rect x="454" y="104" width="178" height="94" rx="8" fill="#0f172a" stroke="#fbbf24" stroke-width="1.6"/>
+        <text x="543" y="131" fill="#fff" font-size="13" font-weight="700" text-anchor="middle">SAFETY ADMISSION</text>
+        <text x="543" y="153" fill="#94a3b8" font-size="10" text-anchor="middle">scope • owner • Gate</text>
+        <text x="543" y="172" fill="#94a3b8" font-size="10" text-anchor="middle">privacy • overlap • value</text>
+
+        <rect x="702" y="104" width="176" height="94" rx="8" fill="#0f172a" stroke="#a78bfa" stroke-width="1.6"/>
+        <text x="790" y="132" fill="#fff" font-size="13" font-weight="700" text-anchor="middle">ROUTING KERNEL</text>
+        <text x="790" y="154" fill="#a78bfa" font-size="10" text-anchor="middle">L0 • D1 • L1 • L2 • L3</text>
+        <text x="790" y="174" fill="#94a3b8" font-size="10" text-anchor="middle">SERIAL • BLOCKED</text>
+
+        <g>
+          <rect x="62" y="292" width="176" height="92" rx="8" fill="#0f172a" stroke="#64748b" stroke-width="1.5"/>
+          <text x="150" y="321" fill="#fff" font-size="13" font-weight="700" text-anchor="middle">L0 · LOCAL</text>
+          <text x="150" y="344" fill="#94a3b8" font-size="10" text-anchor="middle">tiny, ordered, or low value</text>
+          <text x="150" y="364" fill="#64748b" font-size="9" text-anchor="middle">parent owns execution</text>
+
+          <rect x="290" y="292" width="230" height="92" rx="8" fill="#0f172a" stroke="#34d399" stroke-width="1.8"/>
+          <text x="405" y="318" fill="#fff" font-size="13" font-weight="700" text-anchor="middle">D1 · ONE WORKER</text>
+          <text x="405" y="341" fill="#34d399" font-size="10" text-anchor="middle">one bounded owner + one Gate</text>
+          <text x="405" y="361" fill="#94a3b8" font-size="9" text-anchor="middle">delegation, not parallelism</text>
+
+          <rect x="545" y="292" width="250" height="92" rx="8" fill="#0f172a" stroke="#22d3ee" stroke-width="1.5"/>
+          <text x="670" y="318" fill="#fff" font-size="13" font-weight="700" text-anchor="middle">EXPLORE → D1 / L1</text>
+          <text x="670" y="341" fill="#22d3ee" font-size="10" text-anchor="middle">close discovery before writing</text>
+          <text x="670" y="361" fill="#94a3b8" font-size="9" text-anchor="middle">read-only evidence freezes packet</text>
+
+          <rect x="820" y="292" width="220" height="92" rx="8" fill="#0f172a" stroke="#a78bfa" stroke-width="1.5"/>
+          <text x="930" y="318" fill="#fff" font-size="13" font-weight="700" text-anchor="middle">L2 · 2–3 LANES</text>
+          <text x="930" y="341" fill="#a78bfa" font-size="10" text-anchor="middle">disjoint owners + Gates</text>
+          <text x="930" y="361" fill="#94a3b8" font-size="9" text-anchor="middle">bounded live capacity</text>
+
+          <rect x="1060" y="292" width="100" height="92" rx="8" fill="#0f172a" stroke="#fb7185" stroke-width="1.5"/>
+          <text x="1110" y="319" fill="#fff" font-size="13" font-weight="700" text-anchor="middle">L3</text>
+          <text x="1110" y="341" fill="#fb7185" font-size="10" text-anchor="middle">HANDOFF</text>
+          <text x="1110" y="361" fill="#94a3b8" font-size="9" text-anchor="middle">heavy Flow</text>
+        </g>
+
+        <rect x="520" y="406" width="330" height="48" rx="8" fill="#0f172a" stroke="#34d399" stroke-width="1.7"/>
+        <text x="685" y="426" fill="#fff" font-size="12" font-weight="700" text-anchor="middle">PARENT INTEGRATION + FINAL GATE</text>
+          <text x="685" y="443" fill="#94a3b8" font-size="9" text-anchor="middle">scope audit • optional review • final candidate</text>
+
+        <rect x="405" y="532" width="300" height="92" rx="8" fill="#0f172a" stroke="#fb7185" stroke-width="1.6"/>
+        <text x="555" y="558" fill="#fff" font-size="13" font-weight="700" text-anchor="middle">HOST ROLE ROUTING</text>
+        <text x="555" y="580" fill="#fb7185" font-size="10" text-anchor="middle">account • provider • model • reasoning</text>
+        <text x="555" y="601" fill="#94a3b8" font-size="9" text-anchor="middle">private config; static route ≠ request proof</text>
+
+        <rect x="780" y="532" width="300" height="92" rx="8" fill="#0f172a" stroke="#94a3b8" stroke-width="1.6"/>
+        <text x="930" y="558" fill="#fff" font-size="13" font-weight="700" text-anchor="middle">HOST RUNTIME</text>
+        <text x="930" y="580" fill="#94a3b8" font-size="10" text-anchor="middle">spawn • tools • transport • capacity</text>
+        <text x="930" y="601" fill="#94a3b8" font-size="9" text-anchor="middle">commands still run in the host workspace</text>
+
+        <path d="M 705 578 L 778 578" fill="none" stroke="#34d399" stroke-width="1.8" marker-end="url(#green-arrow)"/>
+        <path d="M 930 532 L 930 474 L 850 474" fill="none" stroke="#34d399" stroke-width="1.8" marker-end="url(#green-arrow)"/>
+        <text x="890" y="468" fill="#34d399" font-size="9" text-anchor="middle">structured result</text>
+      </svg>
+    </main>
+
+    <section class="cards">
+      <article class="card"><h2 class="cyan">Balanced compatibility</h2><p>No mode instruction means the published conservative behavior. A single ordinary implementation remains local.</p></article>
+      <article class="card"><h2 class="emerald">Compute-offload admission</h2><p>D1 requires one exact owner, bounded scope, reproducible Gate, privacy isolation, no parent overlap, and positive delegation value. Review stays read-only and sequential.</p></article>
+      <article class="card"><h2 class="rose">Trust boundary</h2><p>The repository names roles only. Private routing selects execution identity, and request-level evidence is required to verify it.</p></article>
+    </section>
+    <p class="footer">Adaptive Subagent Orchestration • Compute Offload Contract v1 • Public policy / private route separation</p>
+  </div>
+
+  <script>
+    function captureOptions() {
+      const el = document.getElementById('report-container');
+      const r = el.getBoundingClientRect();
+      const pad = 32;
+      return { el, options: { backgroundColor: '#020617', scale: 2, useCORS: true, ignoreElements: e => e.classList && e.classList.contains('toolbar'), x: r.left + window.scrollX - pad, y: r.top + window.scrollY - pad, width: r.width + pad * 2, height: r.height + pad * 2 } };
+    }
+    async function copyAsImage(btn) {
+      const original = btn.textContent;
+      try { const { options } = captureOptions(); const canvas = await html2canvas(document.body, options); const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png')); await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]); btn.textContent = 'Copied'; }
+      catch (error) { btn.textContent = 'Failed'; }
+      setTimeout(() => { btn.textContent = original; }, 1800);
+    }
+    async function downloadPNG(btn) {
+      const original = btn.textContent;
+      try { const { options } = captureOptions(); const canvas = await html2canvas(document.body, options); const link = document.createElement('a'); link.download = 'compute-offload-architecture.png'; link.href = canvas.toDataURL('image/png'); link.click(); btn.textContent = 'Saved'; }
+      catch (error) { btn.textContent = 'Failed'; }
+      setTimeout(() => { btn.textContent = original; }, 1800);
+    }
+    async function downloadPDF(btn) {
+      const original = btn.textContent;
+      try { const { options } = captureOptions(); const canvas = await html2canvas(document.body, options); const { jsPDF } = window.jspdf; const orientation = canvas.width > canvas.height ? 'landscape' : 'portrait'; const pdf = new jsPDF({ orientation, unit: 'px', format: [canvas.width, canvas.height], hotfixes: ['px_scaling'] }); pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, canvas.width, canvas.height); pdf.save('compute-offload-architecture.pdf'); btn.textContent = 'Saved'; }
+      catch (error) { btn.textContent = 'Failed'; }
+      setTimeout(() => { btn.textContent = original; }, 1800);
+    }
+  </script>
+</body>
+</html>

@@ -8,6 +8,8 @@ Last reviewed: 2026-08-04. This matrix separates repository and lifecycle eviden
 | Install, replace, backup, validate, and fail-closed uninstall | VERIFIED | `tests/test_install.py` covers lifecycle paths; scripts manage only manifest-owned runtime files. |
 | Explicit `$adaptive-subagent-orchestration` invocation | PARTIAL | Runtime guidance and UI metadata define the invocation; the forward record covers representative desktop routing, not every host. |
 | L0 main-thread routing | VERIFIED | Sanitized forward record includes an L0 single-file scenario. |
+| D1 opt-in single-worker contract | VERIFIED | Schema-v2 fixtures and contract tests cover positive and fail-closed D1 decisions; request-level execution remains unverified. |
+| Sequential explorer → worker → optional read-only review | UNVERIFIED | The public contract and fixtures require a maximum of one simultaneous D1 subagent, but no sanitized request-level run is published. |
 | L1 read-only role selection | VERIFIED | Sanitized forward record includes two independent `explorer` results. |
 | L2 disjoint write lanes and parent integration | VERIFIED | Sanitized forward record includes independent worker scopes and a passing final Gate. |
 | Shared-hotspot serial routing | VERIFIED | Sanitized forward record and [serial case](cases/shared-hotspot-serial.md) cover the single-owner boundary. |
@@ -16,6 +18,7 @@ Last reviewed: 2026-08-04. This matrix separates repository and lifecycle eviden
 | Candidate change invalidates old evidence | VERIFIED | Forward record records a changed candidate hash followed by a rerun. |
 | Implicit invocation | UNVERIFIED | `allow_implicit_invocation` is eligibility metadata, not deterministic triggering. |
 | Exact account, provider, model, or reasoning identity | UNVERIFIED | No sanitized request-level identity is published; static configuration is not proof. |
+| Remote command execution | OUT OF SCOPE | Build, test, and shell commands execute in the host workspace; the skill delegates model reasoning and tool control, not host CPU work. |
 | Codex App / desktop surface | PARTIAL | Representative desktop route selection is recorded; full installation and identity coverage are not. |
 | Codex CLI surface | UNVERIFIED | No public request-level CLI run record is included in this candidate. |
 | macOS runtime | UNVERIFIED | Package paths are portable, but no public OS-specific runtime record is used as a universal claim. |

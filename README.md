@@ -2,7 +2,7 @@
 
 Route a medium Codex task to the smallest useful set of lanes, keep one owner for each writable path, and finish with evidence that the parent agent can verify. This repository is the canonical source for the skill, its UI metadata, lifecycle scripts, tests, and public guidance. It is a workflow contract, not a scheduler or a replacement for the Codex runtime.
 
-**Current support status:** v0.1.0 is published. The public repository, GitHub Actions matrix, fresh-clone lifecycle Gate, version tag, and GitHub Release have passed verification. Static contracts, lifecycle behavior, and selected forward cases are covered by the repository tests. A sanitized desktop forward record covers representative routing and result collection. Complete App/CLI and OS coverage, implicit triggering, and request-level runtime identity remain unverified; see the [runtime surface matrix](docs/runtime-surface-matrix.md).
+**Current support status:** v0.1.0 is published. The next candidate adds opt-in D1 compute offload while preserving balanced routing as the default. Static contracts, lifecycle behavior, and selected forward cases are covered by repository tests. A sanitized desktop record covers representative v0.1 routing; request-level D1 execution, complete App/CLI and OS coverage, implicit triggering, and runtime identity remain unverified. See the [runtime surface matrix](docs/runtime-surface-matrix.md).
 
 ![Abstract parent hub routing work through two isolated lanes and merging two evidence tokens into one result.](docs/assets/readme/hero-orchestration.webp)
 
@@ -12,7 +12,7 @@ Route a medium Codex task to the smallest useful set of lanes, keep one owner fo
 
 | Without this skill | With this skill |
 | --- | --- |
-| Decide ad hoc whether to delegate. | Start with L0-L3 routing criteria and a documented handoff boundary. |
+| Decide ad hoc whether to delegate. | Start with L0/D1/L1/L2/L3 routing criteria and a documented handoff boundary. |
 | Let multiple writers discover ownership while editing. | Assign every writable path to one owner for the full run. |
 | Treat a completed transport call as success. | Require a structured result, changed paths, verification, evidence, and residual risk. |
 | Reuse stale evidence after the candidate changes. | Invalidate the old pass and rerun the final Gate. |
@@ -22,22 +22,23 @@ Route a medium Codex task to the smallest useful set of lanes, keep one owner fo
 
 *Figure 2. Independent scopes can use L2; a shared writable path stays serial on the parent.*
 
-The competing-lane distinction matters: disjoint, independently testable write scopes can be L2; a shared hotspot, strict dependency, sensitive context, migration, or release stays serial on the main thread. A cross-module contract or multi-wave DAG is an L3 handoff to heavy orchestration.
+The competing-lane distinction matters: one bounded implementation can use opt-in D1, while disjoint, independently testable write scopes can use L2. A shared hotspot, strict dependency, sensitive context, migration, or release stays serial on the main thread. A cross-module contract or multi-wave DAG is an L3 handoff to heavy orchestration.
 
 ## Routing levels
 
-![L0-L3 routing levels from local execution through read-only exploration and isolated implementation to heavy-orchestration handoff.](docs/assets/readme/routing-levels.svg)
+![Balanced and compute-offload routing from L0 local work through D1 single-worker offload, L1 exploration, L2 parallel implementation, and L3 heavy handoff.](docs/assets/readme/routing-levels.svg)
 
 *Figure 3. Choose the smallest routing level that creates a useful independent lane.*
 
 | Level | Use when | Agents | Outcome |
 | --- | --- | ---: | --- |
 | **L0** | One small or ordered task has no useful independent lane. | 0 | The parent works and runs the final Gate. |
+| **D1** | In explicit `compute-offload` mode, one non-trivial implementation has an exact owner, bounded write scope, reproducible Gate, and positive delegation value. | 1 `worker`, sequential | The worker implements; the parent inspects and reruns the final Gate. Work below five minutes stays L0. |
 | **L1** | Two independent read-only investigations materially reduce uncertainty. | 1-2 `explorer` | Each lane returns paths, lines, command output, or a clear blocker. |
 | **L2** | Two or more implementation lanes have disjoint scopes and independent Gates. | 1-3 `worker`/`default` | The parent integrates, rechecks ownership, and runs the final Gate. |
 | **L3** | The work spans modules, freezes a contract, or needs waves, recovery, or release readiness. | 0 here | Hand off to `orchestrate-heavy-goals`; do not run two orchestrators. |
 
-The limit is one to three subagents per dispatch batch. Capacity, ownership, privacy, and dependency checks can still force `SERIAL` or `BLOCKED`.
+`balanced` is the default and keeps ordinary single-lane work in L0. `compute-offload` is explicit and adds D1 for work estimated at least 10 minutes or with a recorded context-isolation benefit. A D1 discovery `explorer`, implementation `worker`, and optional read-only reviewer run sequentially, never simultaneously. Capacity, ownership, privacy, and dependency checks can still force `SERIAL` or `BLOCKED`.
 
 ## Use it explicitly
 
@@ -45,6 +46,12 @@ In a Codex task, invoke the skill by name:
 
 ```text
 Use $adaptive-subagent-orchestration to assess this task, create only worthwhile independent lanes, and integrate verified results.
+```
+
+To offload one bounded daily implementation, select the mode explicitly:
+
+```text
+Use $adaptive-subagent-orchestration in compute-offload mode. Give one worker the exact owned scope and Gate, then inspect the result and rerun the final Gate in the parent.
 ```
 
 ![Sequence from user goal through parent preflight, bounded lane work, structured result inspection, and the parent final Gate.](docs/assets/readme/parent-agent-sequence.svg)
@@ -107,8 +114,9 @@ Private legacy installs are not migrated automatically. Use an explicit custom t
 
 ## Cases
 
-Read the two small public cases before splitting work:
+Read the public cases before splitting work:
 
+- [Single-worker compute offload](docs/cases/single-worker-compute-offload.md) shows D1 admission, sequential discovery/review, and fail-closed boundaries.
 - [Independent write lanes](docs/cases/independent-write-lanes.md) shows an L2 split with disjoint owners and separate Gates.
 - [Shared hotspot serial](docs/cases/shared-hotspot-serial.md) shows why two writers touching one file stay on the main thread.
 
@@ -121,6 +129,7 @@ The cases are contract examples, not performance promises. Token budgets, confli
 - **Runtime identity:** exact provider, model, account, and reasoning identity are `UNVERIFIED` unless a sanitized request-level record proves them. Never infer them from role names or local configuration.
 - **Conflicts and tokens:** the skill can classify shared ownership and note token or context limits, but it cannot reserve files, guarantee token availability, or promise speed, cost, or quality improvements.
 - **Runtime boundary:** Codex, not this repository, creates, waits for, and closes subagents. Transport completion is not a business `PASS`; the parent must inspect the structured result and rerun any invalidated Gate.
+- **Command boundary:** builds, tests, and shell commands still run in the host workspace. D1 delegates model reasoning and tool control; it does not move local CPU execution to a remote model service.
 - **Platform status:** the [runtime surface matrix](docs/runtime-surface-matrix.md) distinguishes static and forward evidence from unverified App, CLI, and OS coverage. Windows is outside the v0.1 support claim.
 
 ![Evidence loop in which candidate changes invalidate stale results and force affected verification before the parent final Gate.](docs/assets/readme/evidence-gate-loop.svg)
@@ -142,7 +151,7 @@ git diff --check
 
 See [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) before opening a change. The project is published under Apache-2.0 at `https://github.com/hongkai-hue/adaptive-subagent-orchestration`.
 
-For the complete module, trust-boundary, and publication flow, read the [architecture notes](docs/architecture/oss-launch-architecture.md) or open the [interactive architecture diagram](docs/architecture/oss-launch-architecture.html).
+For the complete module, trust-boundary, and publication flow, read the [architecture notes](docs/architecture/oss-launch-architecture.md) or open the [interactive architecture diagram](docs/architecture/oss-launch-architecture.html). The D1 extension is specified in the [compute-offload contract](docs/contracts/compute-offload-contract.md) and [compute-offload architecture](docs/architecture/compute-offload-architecture.md).
 
 ## Repository map
 

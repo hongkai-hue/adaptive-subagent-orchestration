@@ -2,16 +2,21 @@
 
 ## Current stage
 
-The `v0.1.0` open-source release and the six-image bilingual README enhancement are online.
-The public content commit, GitHub Actions matrix, both READMEs, all six assets, and the live
-GitHub render are verified.
+The published `v0.1.0` release remains the public baseline. The opt-in compute-offload Release
+Candidate and local activation are complete; public publication is waiting at the manual push Gate.
 
 ## Completed and verified
 
-- L0-L3 routing, parent control, full-run file ownership, write-before-`BLOCKED`,
+- L0-L3 balanced routing, parent control, full-run file ownership, write-before-`BLOCKED`,
   structured results, evidence invalidation, transport boundaries, bounded retry, and
   no recursive delegation are represented in the English runtime contract.
-- Seventeen forward fixtures cover routing, contract, and safety outcomes.
+- Twenty-five schema-v2 forward fixtures cover balanced compatibility, D1 routing, contracts,
+  heavy handoff, and safety outcomes.
+- The compute-offload Release Candidate adds D1 single-worker admission, sequential discovery and
+  read-only review, a frozen contract and architecture, bilingual guidance, and a five-level route
+  graphic while preserving provider/model neutrality.
+- The user-level host policy and managed active bundle are validated; the previous legacy bundle
+  is preserved as a recoverable sibling backup.
 - Portable lifecycle tooling supports dry-run, user/repository/custom targets, explicit
   replacement, a checksum manifest, sibling backup, target locking, validation, and
   fail-closed uninstall.
@@ -28,6 +33,7 @@ GitHub render are verified.
 
 ## In progress
 
+- Hold public publication behind an explicit manual push decision.
 - Collect additional sanitized App/CLI evidence before expanding support claims.
 
 ## Next

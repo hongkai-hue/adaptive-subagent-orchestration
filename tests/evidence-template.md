@@ -6,8 +6,9 @@ codex_version: "..."
 surface: app | cli
 os: "..."
 scenario: "..."
-expected_route: L0 | L1 | L2 | L3 | SERIAL | BLOCKED
-observed_route: L0 | L1 | L2 | L3 | SERIAL | BLOCKED
+mode: balanced | compute-offload
+expected_route: L0 | D1 | L1 | L2 | L3 | SERIAL | BLOCKED
+observed_route: L0 | D1 | L1 | L2 | L3 | SERIAL | BLOCKED
 roles_requested: []
 runtime_identity: VERIFIED | UNVERIFIED
 owned_paths: {}

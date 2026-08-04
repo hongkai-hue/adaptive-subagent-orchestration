@@ -107,8 +107,9 @@ class SkillContractTests(unittest.TestCase):
     def test_openai_metadata_contract(self):
         required = [
             'display_name: "Adaptive Subagent Orchestrator"',
-            'short_description: "Route medium tasks through 1-3 independent subagents"',
+            'short_description: "Route local, single-worker, parallel, or heavy-goal work safely"',
             "$adaptive-subagent-orchestration",
+            "balanced mode unless host policy explicitly selects compute-offload",
             "allow_implicit_invocation: true",
         ]
         for text in required:
@@ -128,23 +129,24 @@ class SkillContractTests(unittest.TestCase):
             self.assertIsNone(re.search(pattern, combined, re.IGNORECASE), pattern)
 
     def test_forward_fixture_schema_and_ids(self):
-        self.assertEqual("1", self.fixture["schema_version"])
+        self.assertEqual("2", self.fixture["schema_version"])
         cases = self.fixture["cases"]
-        self.assertGreaterEqual(len(cases), 14)
+        self.assertGreaterEqual(len(cases), 25)
         ids = [case["id"] for case in cases]
         self.assertEqual(len(ids), len(set(ids)))
         for case in cases:
             self.assertRegex(case["id"], r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
             self.assertIn(case["kind"], {"routing", "contract", "safety"})
             self.assertEqual(
-                {"estimated_minutes", "lane_types", "lane_count", "write_scopes", "traits"},
+                {"mode", "estimated_minutes", "lane_types", "lane_count", "write_scopes", "traits"},
                 set(case["input"]),
             )
+            self.assertIn(case["input"]["mode"], {"balanced", "compute-offload"})
             self.assertEqual(
                 {"level", "roles", "max_agents", "business_status", "evidence_rule"},
                 set(case["expected"]),
             )
-            self.assertIn(case["expected"]["level"], {"L0", "L1", "L2", "L3", "SERIAL", "BLOCKED"})
+            self.assertIn(case["expected"]["level"], {"L0", "D1", "L1", "L2", "L3", "SERIAL", "BLOCKED"})
             self.assertIn(case["expected"]["business_status"], {"PASS", "BLOCKED", "UNVERIFIED"})
             self.assertLessEqual(case["expected"]["max_agents"], 3)
             self.assertTrue(set(case["expected"]["roles"]).issubset({"explorer", "worker", "default"}))
@@ -162,6 +164,14 @@ class SkillContractTests(unittest.TestCase):
             "sensitive-context-main-thread": ("SERIAL", 0),
             "migration-release-serial": ("SERIAL", 0),
             "capacity-batches-at-three": ("L2", 3),
+            "d1-single-worker-offload": ("D1", 1),
+            "d1-tiny-stays-l0": ("L0", 0),
+            "d1-explorer-then-worker": ("D1", 1),
+            "d1-worker-then-readonly-review": ("D1", 1),
+            "d1-missing-gate-blocked": ("BLOCKED", 0),
+            "d1-parent-overlap-serial": ("SERIAL", 0),
+            "d1-sensitive-context-serial": ("SERIAL", 0),
+            "compute-offload-heavy-still-l3": ("L3", 0),
         }
         for case_id, outcome in expected.items():
             self.assertIn(case_id, cases)
@@ -175,6 +185,7 @@ class SkillContractTests(unittest.TestCase):
             "candidate-change-stales-evidence",
             "retry-without-delta-blocked",
             "worker-recursive-spawn-blocked",
+            "d1-missing-gate-blocked",
         }
         for case_id in blocked:
             self.assertEqual("BLOCKED", cases[case_id]["business_status"])
@@ -183,6 +194,35 @@ class SkillContractTests(unittest.TestCase):
             "require-structured-pass-scope-evidence-and-final-gate",
             cases["transport-completed-not-pass"]["evidence_rule"],
         )
+
+    def test_compute_offload_contract_and_dispatch_order(self):
+        required = [
+            "Use **balanced** when no explicit mode is supplied",
+            "**compute-offload** only when the user, repository, or host policy explicitly selects it",
+            "**D1:** In compute-offload mode",
+            "estimated at least 10 minutes",
+            "A task below five minutes stays L0",
+            "Evaluate L3 first, then unsafe `SERIAL`/`BLOCKED` outcomes, then mode and level",
+            "maximum simultaneous subagents is one",
+            "returns `Changed: none`",
+            "candidate change invalidates both worker and review evidence",
+        ]
+        for text in required:
+            self.assertIn(text, self.skill_text)
+
+        cases = {case["id"]: case for case in self.fixture["cases"]}
+        self.assertEqual(["worker"], cases["d1-single-worker-offload"]["expected"]["roles"])
+        self.assertEqual(
+            ["explorer", "worker"],
+            cases["d1-explorer-then-worker"]["expected"]["roles"],
+        )
+        self.assertEqual(
+            ["worker", "explorer"],
+            cases["d1-worker-then-readonly-review"]["expected"]["roles"],
+        )
+        self.assertEqual(1, cases["d1-explorer-then-worker"]["expected"]["max_agents"])
+        self.assertEqual(1, cases["d1-worker-then-readonly-review"]["expected"]["max_agents"])
+        self.assertEqual("PASS", cases["d1-worker-then-readonly-review"]["expected"]["business_status"])
 
 
 if __name__ == "__main__":

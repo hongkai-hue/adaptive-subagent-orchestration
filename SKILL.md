@@ -1,13 +1,13 @@
 ---
 name: adaptive-subagent-orchestration
-description: Route medium Codex tasks through the smallest useful set of 1-3 subagents. Use when work is likely to exceed 20 minutes or has at least two independent 3-5 minute lanes for research, implementation, testing, or review. Keep small, ordered, shared-state, migration, release, and heavy-DAG work on the main thread or hand it to orchestrate-heavy-goals.
+description: Route Codex tasks through local work, one bounded execution worker, 1-3 independent subagents, or a heavy-goal handoff. Use balanced mode for conservative routing or explicit compute-offload mode when a single non-trivial implementation has an exact owner, scope, and Gate. Keep unsafe, sensitive, shared-state, migration, release, and heavy-DAG work on the parent or behind the appropriate handoff.
 ---
 
 # Adaptive Subagent Orchestration
 
-Choose the smallest useful concurrency for a medium task. Parallelize only results
-that can be accepted independently. Keep architecture, shared state, integration,
-and the final Gate under parent-thread control.
+Choose the smallest useful execution route. Delegate only results that can be accepted
+independently, and do not call sequential offload parallelism. Keep architecture, shared
+state, integration, and the final Gate under parent-thread control.
 
 ## Route The Task
 
@@ -38,13 +38,22 @@ Do not create parallel write workers when any condition applies:
 
 When useful, use one read-only `explorer`; otherwise keep the work on the main thread. Never expand the authority granted by the user.
 
-### 3. Select A Level
+### 3. Select A Mode And Level
 
-- **L0:** Fewer than two independent lanes, or a task below 20 minutes without a clear context-isolation benefit. Do not create a subagent.
+Use **balanced** when no explicit mode is supplied; never infer a mode from account, provider,
+model, or role configuration. Balanced preserves the conservative behavior below. Use
+**compute-offload** only when the user, repository, or host policy explicitly selects it.
+Resolve conflicting mode declarations in this order: current user task, repository policy,
+user-level host policy, then the balanced default.
+
+- **L0:** A tiny, ordered, low-value, or balanced single-lane task. Do not create a subagent.
+- **D1:** In compute-offload mode, one implementation estimated at least 10 minutes, or with a recorded context-isolation benefit, has one exact owner, bounded write scope, reproducible Gate, no parent overlap, no unminimized sensitive context, and positive delegation value. Create one `worker`. A task below five minutes stays L0.
 - **L1:** Two independent research, diagnosis, log-analysis, test-analysis, or review lanes. Create one or two `explorer` agents.
 - **L2:** Two or more independent implementation lanes with disjoint write scopes and independent acceptance Gates. Create two or three `worker` agents.
 
-Treat 20 minutes as a routing signal, not a promise. Use L1 when two read-only lanes materially reduce uncertainty even below that threshold.
+Evaluate L3 first, then unsafe `SERIAL`/`BLOCKED` outcomes, then mode and level. D1 cannot
+override a heavy or safety decision. Treat time as a routing signal; scope, Gate, privacy,
+ownership, and context-isolation value remain controlling.
 
 ### 4. Define Goal And Done When
 
@@ -108,6 +117,18 @@ Pass only necessary context. Never pass `.env` files, tokens, cookies, API keys,
 6. Wait for required lanes only when integration needs them, then close each accepted or cancelled agent.
 
 If subagent controls are unavailable, complete the work serially in the parent thread. If a new user request changes the goal, stop or revise every lane that no longer applies.
+
+## Run Compute Offload Sequentially
+
+For D1, the parent does not edit the worker-owned scope while the lane is active. When discovery
+is required before scope can be frozen, run one read-only `explorer`, close it with evidence,
+then create the worker packet; maximum simultaneous subagents is one. If discovery cannot
+establish a safe scope and Gate, return `BLOCKED` before writing.
+
+After a D1 worker closes with structured `PASS`, the parent may send the exact unchanged
+candidate to one read-only `explorer` for independent review. The reviewer has no write scope,
+returns `Changed: none`, and checks the diff or Gate evidence. Close the reviewer before the
+parent final Gate. A candidate change invalidates both worker and review evidence.
 
 ## Enforce Role Boundaries
 

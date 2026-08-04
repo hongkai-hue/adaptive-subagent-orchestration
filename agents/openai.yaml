@@ -1,7 +1,7 @@
 interface:
   display_name: "Adaptive Subagent Orchestrator"
-  short_description: "Route medium tasks through 1-3 independent subagents"
-  default_prompt: "Use $adaptive-subagent-orchestration to assess this task, create only worthwhile independent lanes, and integrate verified results."
+  short_description: "Route local, single-worker, parallel, or heavy-goal work safely"
+  default_prompt: "Use $adaptive-subagent-orchestration in balanced mode unless host policy explicitly selects compute-offload; choose the smallest safe route and integrate verified results."
 
 policy:
   allow_implicit_invocation: true

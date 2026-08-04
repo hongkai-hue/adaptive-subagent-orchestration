@@ -1,124 +1,180 @@
 {
-  "schema_version": "1",
+  "schema_version": "2",
   "cases": [
     {
       "id": "l0-single-file",
       "title": "单文件简单修复由主线程完成",
       "kind": "routing",
-      "input": {"estimated_minutes": 8, "lane_types": ["write"], "lane_count": 1, "write_scopes": ["src/check.py"], "traits": []},
+      "input": {"mode": "balanced", "estimated_minutes": 8, "lane_types": ["write"], "lane_count": 1, "write_scopes": ["src/check.py"], "traits": []},
       "expected": {"level": "L0", "roles": [], "max_agents": 0, "business_status": "UNVERIFIED", "evidence_rule": "main-thread-final-gate"}
     },
     {
       "id": "l1-two-readonly",
       "title": "两个独立只读方向使用 explorer",
       "kind": "routing",
-      "input": {"estimated_minutes": 18, "lane_types": ["readonly", "readonly"], "lane_count": 2, "write_scopes": [], "traits": ["context-isolation-value"]},
+      "input": {"mode": "balanced", "estimated_minutes": 18, "lane_types": ["readonly", "readonly"], "lane_count": 2, "write_scopes": [], "traits": ["context-isolation-value"]},
       "expected": {"level": "L1", "roles": ["explorer", "explorer"], "max_agents": 2, "business_status": "UNVERIFIED", "evidence_rule": "paths-lines-or-command-output"}
     },
     {
       "id": "l2-two-disjoint-workers",
       "title": "两个写范围零交集的实现车道",
       "kind": "routing",
-      "input": {"estimated_minutes": 35, "lane_types": ["write", "write"], "lane_count": 2, "write_scopes": ["alpha/", "beta/"], "traits": ["disjoint-scopes", "independent-gates"]},
+      "input": {"mode": "balanced", "estimated_minutes": 35, "lane_types": ["write", "write"], "lane_count": 2, "write_scopes": ["alpha/", "beta/"], "traits": ["disjoint-scopes", "independent-gates"]},
       "expected": {"level": "L2", "roles": ["worker", "worker"], "max_agents": 2, "business_status": "UNVERIFIED", "evidence_rule": "changed-paths-match-owner-matrix"}
     },
     {
       "id": "shared-hotspot-serial",
       "title": "共享热点文件禁止并行写入",
       "kind": "safety",
-      "input": {"estimated_minutes": 30, "lane_types": ["write", "write"], "lane_count": 2, "write_scopes": ["config/core.toml", "config/core.toml"], "traits": ["shared-hotspot"]},
+      "input": {"mode": "balanced", "estimated_minutes": 30, "lane_types": ["write", "write"], "lane_count": 2, "write_scopes": ["config/core.toml", "config/core.toml"], "traits": ["shared-hotspot"]},
       "expected": {"level": "SERIAL", "roles": [], "max_agents": 0, "business_status": "UNVERIFIED", "evidence_rule": "single-writer"}
     },
     {
       "id": "missing-write-scope-blocked",
       "title": "写入任务包缺少范围时失败关闭",
       "kind": "contract",
-      "input": {"estimated_minutes": 25, "lane_types": ["write"], "lane_count": 1, "write_scopes": [], "traits": ["incomplete-packet"]},
+      "input": {"mode": "balanced", "estimated_minutes": 25, "lane_types": ["write"], "lane_count": 1, "write_scopes": [], "traits": ["incomplete-packet"]},
       "expected": {"level": "BLOCKED", "roles": ["worker"], "max_agents": 0, "business_status": "BLOCKED", "evidence_rule": "block-before-write"}
     },
     {
       "id": "owner-conflict-blocked",
       "title": "跨批次 owner 冲突时不得转交",
       "kind": "contract",
-      "input": {"estimated_minutes": 40, "lane_types": ["write", "write"], "lane_count": 2, "write_scopes": ["src/shared.py", "src/shared.py"], "traits": ["owner-conflict", "cross-batch"]},
+      "input": {"mode": "balanced", "estimated_minutes": 40, "lane_types": ["write", "write"], "lane_count": 2, "write_scopes": ["src/shared.py", "src/shared.py"], "traits": ["owner-conflict", "cross-batch"]},
       "expected": {"level": "BLOCKED", "roles": ["worker"], "max_agents": 0, "business_status": "BLOCKED", "evidence_rule": "one-file-one-owner-for-run"}
     },
     {
       "id": "shared-integration-single-owner",
       "title": "共享集成文件由主线程单独持有",
       "kind": "contract",
-      "input": {"estimated_minutes": 45, "lane_types": ["write", "write"], "lane_count": 2, "write_scopes": ["alpha/", "beta/"], "traits": ["disjoint-scopes", "shared-integration-main-owner"]},
+      "input": {"mode": "balanced", "estimated_minutes": 45, "lane_types": ["write", "write"], "lane_count": 2, "write_scopes": ["alpha/", "beta/"], "traits": ["disjoint-scopes", "shared-integration-main-owner"]},
       "expected": {"level": "L2", "roles": ["worker", "worker"], "max_agents": 2, "business_status": "UNVERIFIED", "evidence_rule": "integration-file-has-single-owner"}
     },
     {
       "id": "candidate-change-stales-evidence",
       "title": "候选变化使旧证据失效",
       "kind": "contract",
-      "input": {"estimated_minutes": 35, "lane_types": ["write", "write"], "lane_count": 2, "write_scopes": ["src/a.py", "src/b.py"], "traits": ["candidate-changed-after-pass"]},
+      "input": {"mode": "balanced", "estimated_minutes": 35, "lane_types": ["write", "write"], "lane_count": 2, "write_scopes": ["src/a.py", "src/b.py"], "traits": ["candidate-changed-after-pass"]},
       "expected": {"level": "L2", "roles": ["worker", "worker"], "max_agents": 2, "business_status": "BLOCKED", "evidence_rule": "invalidate-old-pass-and-rerun-gate"}
     },
     {
       "id": "transport-completed-not-pass",
       "title": "transport completed 不等于业务通过",
       "kind": "contract",
-      "input": {"estimated_minutes": 20, "lane_types": ["readonly", "readonly"], "lane_count": 2, "write_scopes": [], "traits": ["transport-completed", "missing-structured-pass"]},
+      "input": {"mode": "balanced", "estimated_minutes": 20, "lane_types": ["readonly", "readonly"], "lane_count": 2, "write_scopes": [], "traits": ["transport-completed", "missing-structured-pass"]},
       "expected": {"level": "L1", "roles": ["explorer", "explorer"], "max_agents": 2, "business_status": "UNVERIFIED", "evidence_rule": "require-structured-pass-scope-evidence-and-final-gate"}
     },
     {
       "id": "retry-without-delta-blocked",
       "title": "无 Delta 的重复返工被拒绝",
       "kind": "contract",
-      "input": {"estimated_minutes": 30, "lane_types": ["write", "write"], "lane_count": 2, "write_scopes": ["one/", "two/"], "traits": ["retry", "no-delta", "no-new-evidence"]},
+      "input": {"mode": "balanced", "estimated_minutes": 30, "lane_types": ["write", "write"], "lane_count": 2, "write_scopes": ["one/", "two/"], "traits": ["retry", "no-delta", "no-new-evidence"]},
       "expected": {"level": "BLOCKED", "roles": ["worker"], "max_agents": 0, "business_status": "BLOCKED", "evidence_rule": "same-owner-scope-plus-failure-class-and-delta"}
     },
     {
       "id": "worker-recursive-spawn-blocked",
       "title": "worker 不得递归委派",
       "kind": "contract",
-      "input": {"estimated_minutes": 30, "lane_types": ["write", "write"], "lane_count": 2, "write_scopes": ["one/", "two/"], "traits": ["recursive-spawn-request"]},
+      "input": {"mode": "balanced", "estimated_minutes": 30, "lane_types": ["write", "write"], "lane_count": 2, "write_scopes": ["one/", "two/"], "traits": ["recursive-spawn-request"]},
       "expected": {"level": "BLOCKED", "roles": ["worker"], "max_agents": 0, "business_status": "BLOCKED", "evidence_rule": "only-main-thread-may-orchestrate"}
     },
     {
       "id": "l3-cross-module-contract",
       "title": "跨模块契约升级 Heavy",
       "kind": "routing",
-      "input": {"estimated_minutes": 180, "lane_types": ["write", "write", "write", "verification"], "lane_count": 4, "write_scopes": ["api/", "core/", "ui/"], "traits": ["cross-module-contract", "four-acceptance-nodes"]},
+      "input": {"mode": "balanced", "estimated_minutes": 180, "lane_types": ["write", "write", "write", "verification"], "lane_count": 4, "write_scopes": ["api/", "core/", "ui/"], "traits": ["cross-module-contract", "four-acceptance-nodes"]},
       "expected": {"level": "L3", "roles": [], "max_agents": 0, "business_status": "UNVERIFIED", "evidence_rule": "handoff-to-orchestrate-heavy-goals"}
     },
     {
       "id": "sensitive-context-main-thread",
       "title": "敏感上下文无法剥离时留在主线程",
       "kind": "safety",
-      "input": {"estimated_minutes": 30, "lane_types": ["readonly", "write"], "lane_count": 2, "write_scopes": ["private/input"], "traits": ["sensitive-context-cannot-minimize"]},
+      "input": {"mode": "balanced", "estimated_minutes": 30, "lane_types": ["readonly", "write"], "lane_count": 2, "write_scopes": ["private/input"], "traits": ["sensitive-context-cannot-minimize"]},
       "expected": {"level": "SERIAL", "roles": [], "max_agents": 0, "business_status": "UNVERIFIED", "evidence_rule": "main-thread-only"}
     },
     {
       "id": "migration-release-serial",
       "title": "数据库迁移或生产发布不并行写入",
       "kind": "safety",
-      "input": {"estimated_minutes": 90, "lane_types": ["write", "write"], "lane_count": 2, "write_scopes": ["db/schema", "production/release"], "traits": ["database-migration", "production-release"]},
+      "input": {"mode": "balanced", "estimated_minutes": 90, "lane_types": ["write", "write"], "lane_count": 2, "write_scopes": ["db/schema", "production/release"], "traits": ["database-migration", "production-release"]},
       "expected": {"level": "SERIAL", "roles": [], "max_agents": 0, "business_status": "UNVERIFIED", "evidence_rule": "user-gate-and-main-thread-control"}
     },
     {
       "id": "strict-dependencies-serial",
       "title": "强顺序依赖不并行",
       "kind": "routing",
-      "input": {"estimated_minutes": 35, "lane_types": ["write", "write"], "lane_count": 2, "write_scopes": ["stage-one/", "stage-two/"], "traits": ["strict-dependency"]},
+      "input": {"mode": "balanced", "estimated_minutes": 35, "lane_types": ["write", "write"], "lane_count": 2, "write_scopes": ["stage-one/", "stage-two/"], "traits": ["strict-dependency"]},
       "expected": {"level": "SERIAL", "roles": [], "max_agents": 0, "business_status": "UNVERIFIED", "evidence_rule": "execute-in-dependency-order"}
     },
     {
       "id": "capacity-batches-at-three",
       "title": "四个 ready 车道按容量分批且最多三个",
       "kind": "routing",
-      "input": {"estimated_minutes": 60, "lane_types": ["write", "write", "write", "write"], "lane_count": 4, "write_scopes": ["a/", "b/", "c/", "d/"], "traits": ["disjoint-scopes", "independent-gates", "no-heavy-threshold"]},
+      "input": {"mode": "balanced", "estimated_minutes": 60, "lane_types": ["write", "write", "write", "write"], "lane_count": 4, "write_scopes": ["a/", "b/", "c/", "d/"], "traits": ["disjoint-scopes", "independent-gates", "no-heavy-threshold"]},
       "expected": {"level": "L2", "roles": ["worker", "worker", "worker"], "max_agents": 3, "business_status": "UNVERIFIED", "evidence_rule": "min-ready-live-capacity-and-three"}
     },
     {
       "id": "final-candidate-gate-pass",
       "title": "最终候选未再变化且主线程 Gate 通过",
       "kind": "contract",
-      "input": {"estimated_minutes": 35, "lane_types": ["write", "write"], "lane_count": 2, "write_scopes": ["alpha/", "beta/"], "traits": ["disjoint-scopes", "structured-pass", "owner-check-passed", "final-gate-passed"]},
+      "input": {"mode": "balanced", "estimated_minutes": 35, "lane_types": ["write", "write"], "lane_count": 2, "write_scopes": ["alpha/", "beta/"], "traits": ["disjoint-scopes", "structured-pass", "owner-check-passed", "final-gate-passed"]},
       "expected": {"level": "L2", "roles": ["worker", "worker"], "max_agents": 2, "business_status": "PASS", "evidence_rule": "structured-pass-owner-evidence-and-final-gate"}
+    },
+    {
+      "id": "d1-single-worker-offload",
+      "title": "Compute offload 将单个有界实现交给一个 worker",
+      "kind": "routing",
+      "input": {"mode": "compute-offload", "estimated_minutes": 15, "lane_types": ["write"], "lane_count": 1, "write_scopes": ["src/module/"], "traits": ["bounded-scope", "single-owner", "reproducible-gate", "parent-no-overlap"]},
+      "expected": {"level": "D1", "roles": ["worker"], "max_agents": 1, "business_status": "UNVERIFIED", "evidence_rule": "single-owner-scope-gate-and-parent-final-gate"}
+    },
+    {
+      "id": "d1-tiny-stays-l0",
+      "title": "Compute offload 下的微小修改仍由主线程完成",
+      "kind": "routing",
+      "input": {"mode": "compute-offload", "estimated_minutes": 3, "lane_types": ["write"], "lane_count": 1, "write_scopes": ["src/typo.py"], "traits": ["bounded-scope", "reproducible-gate", "context-isolation-value"]},
+      "expected": {"level": "L0", "roles": [], "max_agents": 0, "business_status": "UNVERIFIED", "evidence_rule": "delegation-overhead-exceeds-value"}
+    },
+    {
+      "id": "d1-explorer-then-worker",
+      "title": "先只读定位再顺序交给单 worker",
+      "kind": "routing",
+      "input": {"mode": "compute-offload", "estimated_minutes": 25, "lane_types": ["readonly", "write"], "lane_count": 2, "write_scopes": ["src/resolved-scope/"], "traits": ["sequential-exploration", "scope-frozen-after-evidence", "single-owner", "reproducible-gate"]},
+      "expected": {"level": "D1", "roles": ["explorer", "worker"], "max_agents": 1, "business_status": "UNVERIFIED", "evidence_rule": "close-explorer-freeze-packet-then-worker"}
+    },
+    {
+      "id": "d1-worker-then-readonly-review",
+      "title": "单 worker 完成后对同一候选进行独立只读复核",
+      "kind": "contract",
+      "input": {"mode": "compute-offload", "estimated_minutes": 30, "lane_types": ["write", "readonly"], "lane_count": 2, "write_scopes": ["src/reviewed/"], "traits": ["bounded-scope", "single-owner", "structured-pass", "readonly-review", "candidate-unchanged", "reproducible-gate"]},
+      "expected": {"level": "D1", "roles": ["worker", "explorer"], "max_agents": 1, "business_status": "PASS", "evidence_rule": "close-worker-review-changed-none-then-parent-final-gate"}
+    },
+    {
+      "id": "d1-missing-gate-blocked",
+      "title": "D1 缺少可复跑 Gate 时写入前阻断",
+      "kind": "safety",
+      "input": {"mode": "compute-offload", "estimated_minutes": 20, "lane_types": ["write"], "lane_count": 1, "write_scopes": ["src/unsafe/"], "traits": ["bounded-scope", "single-owner", "missing-gate"]},
+      "expected": {"level": "BLOCKED", "roles": ["worker"], "max_agents": 0, "business_status": "BLOCKED", "evidence_rule": "block-before-write-missing-gate"}
+    },
+    {
+      "id": "d1-parent-overlap-serial",
+      "title": "父线程与 worker 写范围重叠时保持串行",
+      "kind": "safety",
+      "input": {"mode": "compute-offload", "estimated_minutes": 20, "lane_types": ["write"], "lane_count": 1, "write_scopes": ["src/shared.py"], "traits": ["parent-write-overlap", "shared-hotspot", "reproducible-gate"]},
+      "expected": {"level": "SERIAL", "roles": [], "max_agents": 0, "business_status": "UNVERIFIED", "evidence_rule": "parent-or-worker-single-owner-not-both"}
+    },
+    {
+      "id": "d1-sensitive-context-serial",
+      "title": "Compute offload 不能绕过敏感上下文边界",
+      "kind": "safety",
+      "input": {"mode": "compute-offload", "estimated_minutes": 25, "lane_types": ["write"], "lane_count": 1, "write_scopes": ["private/input"], "traits": ["bounded-scope", "reproducible-gate", "sensitive-context-cannot-minimize"]},
+      "expected": {"level": "SERIAL", "roles": [], "max_agents": 0, "business_status": "UNVERIFIED", "evidence_rule": "main-thread-only"}
+    },
+    {
+      "id": "compute-offload-heavy-still-l3",
+      "title": "Compute offload 不能绕过 L3 重型阈值",
+      "kind": "safety",
+      "input": {"mode": "compute-offload", "estimated_minutes": 180, "lane_types": ["write", "write", "write", "verification"], "lane_count": 4, "write_scopes": ["api/", "core/", "ui/"], "traits": ["cross-module-contract", "four-acceptance-nodes"]},
+      "expected": {"level": "L3", "roles": [], "max_agents": 0, "business_status": "UNVERIFIED", "evidence_rule": "handoff-to-orchestrate-heavy-goals"}
     }
   ]
 }

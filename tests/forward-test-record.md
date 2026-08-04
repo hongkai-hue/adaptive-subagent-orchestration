@@ -23,15 +23,18 @@ Run:
 python3 -m unittest discover -s tests -v
 ```
 
-The forward fixture covers L0, L1, L2, L3, `SERIAL`, and `BLOCKED`, including shared
+The schema-v2 forward fixture covers L0, D1, L1, L2, L3, `SERIAL`, and `BLOCKED`, including shared
 ownership, candidate invalidation, transport boundaries, retry-without-Delta, recursive
-delegation rejection, sensitive context, migration/release, and live-capacity batching.
+delegation rejection, sensitive context, migration/release, live-capacity batching, D1 admission,
+sequential discovery, optional read-only review, and D1 fail-closed outcomes. These D1 entries are
+static contract evidence, not request-level runtime observations.
 
 ## Representative local forward observations
 
 | Scenario | Observed result | Evidence status |
 | --- | --- | --- |
 | L0 single-file task | Parent selected L0 and created no subagent | VERIFIED for the recorded desktop run |
+| D1 single-worker offload | Covered by schema-v2 fixtures; no sanitized request-level run is included | UNVERIFIED at runtime |
 | Shared hotspot | Parallel writers were rejected; the parent retained one owner | VERIFIED for the recorded desktop run |
 | L3 cross-module contract | The lightweight workflow handed off to heavy orchestration | VERIFIED for the recorded desktop run |
 | L1 read-only audit | Two explorers returned structured results with `Changed: none` | VERIFIED for the recorded desktop run |
@@ -50,6 +53,7 @@ delegation rejection, sensitive context, migration/release, and live-capacity ba
 | Exact account/provider/model/reasoning identity | UNVERIFIED | No sanitized request-level identity is included |
 | CLI runtime | UNVERIFIED | No public request-level CLI run is included |
 | Implicit invocation | UNVERIFIED | Eligibility metadata does not prove deterministic triggering |
+| D1 single-worker and sequential review runtime | UNVERIFIED | Static fixtures do not prove a host created or routed the requested roles |
 
 Use [evidence-template.md](evidence-template.md) for future runs. Do not add private
 paths, credentials, endpoints, account details, local routing configuration, or private

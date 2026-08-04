@@ -2,7 +2,7 @@
 
 这个 skill 把中等规模的 Codex 任务路由到最小且有价值的车道集合，为每个可写路径固定一个全程 owner，并要求主线程用证据完成最终 Gate。本仓库是 skill、UI 元数据、生命周期脚本、测试和公开文档的 canonical source；它不是调度器，也不替代 Codex runtime。
 
-**当前支持状态：** v0.1.0 已发布。Public 仓库、GitHub Actions 矩阵、公网 fresh-clone 生命周期 Gate、版本 tag 与 GitHub Release 均已通过验证。标准库契约测试覆盖静态规则、生命周期和若干前向用例；脱敏前向记录覆盖代表性的路由和结果回收。完整的 App／CLI 与操作系统覆盖、隐式触发和请求级 runtime identity 仍是未验证状态，详见 [运行面矩阵](docs/runtime-surface-matrix.md)。
+**当前支持状态：** v0.1.0 已发布。下一候选版增加显式启用的 D1 compute offload，同时保持 balanced 为默认路由。仓库测试覆盖静态契约、生命周期和代表性用例；脱敏桌面记录覆盖 v0.1 代表性路由。D1 请求级执行、完整 App／CLI 与操作系统覆盖、隐式触发和 runtime identity 仍未验证，详见 [运行面矩阵](docs/runtime-surface-matrix.md)。
 
 ![一个抽象父节点将工作路由到两条隔离车道，并把两份证据汇合为一个结果。](docs/assets/readme/hero-orchestration.webp)
 
@@ -12,7 +12,7 @@
 
 | 不使用这个 skill | 使用这个 skill |
 | --- | --- |
-| 临时决定是否委派。 | 先按 L0-L3 标准选择路由和交接边界。 |
+| 临时决定是否委派。 | 先按 L0／D1／L1／L2／L3 标准选择路由和交接边界。 |
 | 多个写入者边改边争 owner。 | 一个可写路径在整个运行中只有一个 owner。 |
 | 把 transport 完成当成任务成功。 | 要求结构化结果、changed paths、验证命令、证据和 residual risk。 |
 | 候选发生变化后继续沿用旧证据。 | 旧 PASS 失效，重新运行最终 Gate。 |
@@ -22,22 +22,23 @@
 
 *图 2：独立范围可以进入 L2，共享可写路径必须由父线程串行处理。*
 
-竞争车道必须有互不重叠的写入范围和独立 Gate，才能进入 L2。共享热点、严格依赖、无法剥离的敏感上下文、迁移或发布工作留在主线程串行处理。跨模块契约、波次、恢复或发布准备工作交给 L3 的 heavy orchestration。
+一个边界清晰的实现可以进入显式启用的 D1；多个竞争车道必须有互不重叠的写入范围和独立 Gate，才能进入 L2。共享热点、严格依赖、无法剥离的敏感上下文、迁移或发布工作留在主线程串行处理。跨模块契约、波次、恢复或发布准备工作交给 L3 的 heavy orchestration。
 
 ## 路由级别
 
-![从本地执行、只读探索、隔离实现到重型编排交接的 L0-L3 路由层级图。](docs/assets/readme/routing-levels.svg)
+![从 L0 本地执行、D1 单 worker 卸载、L1 只读探索、L2 并行实现到 L3 重型编排交接的 balanced 与 compute-offload 路由图。](docs/assets/readme/routing-levels.svg)
 
 *图 3：只选择能够产生有价值独立车道的最小路由层级。*
 
 | 级别 | 适用场景 | agent 数量 | 结果 |
 | --- | --- | ---: | --- |
 | **L0** | 单个小任务或有序任务没有有价值的独立车道。 | 0 | 主线程执行并运行最终 Gate。 |
+| **D1** | 显式 `compute-offload` 模式下，单个非琐碎实现具备精确 owner、受限写入范围、可复跑 Gate 和正向委派价值。 | 1 个 `worker`，串行 | worker 实现，主线程检查并重跑最终 Gate；少于五分钟的任务仍是 L0。 |
 | **L1** | 两个独立的只读调查能够明显降低不确定性。 | 1-2 个 `explorer` | 每条车道返回路径、行号、命令输出或明确阻塞。 |
 | **L2** | 两个或更多实现车道拥有不相交范围和独立 Gate。 | 1-3 个 `worker`／`default` | 主线程集成、复核 owner 并运行最终 Gate。 |
 | **L3** | 工作跨模块、需要冻结契约，或需要波次、恢复、发布准备。 | 本 skill 为 0 | 交给 `orchestrate-heavy-goals`，不要叠加两个 orchestrator。 |
 
-每个 dispatch batch 最多使用 1-3 个 subagent。容量、owner、隐私和依赖检查仍可能把任务降为 `SERIAL` 或 `BLOCKED`。
+`balanced` 是默认模式，普通单车道任务仍走 L0。只有显式选择 `compute-offload`，预计至少 10 分钟或有明确上下文隔离收益的任务才可进入 D1。D1 的 discovery `explorer`、implementation `worker` 和可选只读 reviewer 均按顺序运行，不能同时执行。容量、owner、隐私和依赖检查仍可能把任务降为 `SERIAL` 或 `BLOCKED`。
 
 ## 显式调用
 
@@ -45,6 +46,12 @@
 
 ```text
 Use $adaptive-subagent-orchestration to assess this task, create only worthwhile independent lanes, and integrate verified results.
+```
+
+要卸载一个边界清晰的日常实现，显式指定模式：
+
+```text
+Use $adaptive-subagent-orchestration in compute-offload mode. Give one worker the exact owned scope and Gate, then inspect the result and rerun the final Gate in the parent.
 ```
 
 ![从用户目标、父线程预检、受限车道执行、结构化结果检查到父线程最终 Gate 的时序图。](docs/assets/readme/parent-agent-sequence.svg)
@@ -107,6 +114,7 @@ UI 元数据只表示允许隐式触发，不保证 Codex 一定选择这个 ski
 
 ## 案例
 
+- [单 worker compute offload](docs/cases/single-worker-compute-offload.md)：展示 D1 准入、串行 discovery／review 和 fail-closed 边界。
 - [独立写入车道](docs/cases/independent-write-lanes.md)：展示不相交 owner 和独立 Gate 的 L2 拆分。
 - [共享热点串行](docs/cases/shared-hotspot-serial.md)：展示两个写入者触碰同一文件时为什么留在主线程。
 
@@ -119,6 +127,7 @@ UI 元数据只表示允许隐式触发，不保证 Codex 一定选择这个 ski
 - **Runtime identity：** 除非脱敏的请求级记录直接证明，否则 exact provider、model、account 和 reasoning identity 都是 `UNVERIFIED`，不能从角色名或本地配置推断。
 - **冲突和 token：** skill 可以识别共享 owner、记录 token 或上下文限制，但不能锁定文件、保证 token 可用，也不保证速度、成本或质量提升。
 - **Runtime 边界：** subagent 的创建、等待和关闭由 Codex 完成；transport completed 不等于业务 `PASS`，主线程必须检查结构化结果，并在候选变化后重跑 Gate。
+- **命令边界：** build、test 和 shell 命令仍在宿主工作区执行。D1 委派的是模型推理与工具控制，不会把本机 CPU 执行迁移到远端模型服务。
 - **平台状态：** [运行面矩阵](docs/runtime-surface-matrix.md) 区分静态／前向证据与尚未验证的 App、CLI、OS 覆盖；Windows 不在 v0.1 支持声明内。
 
 ![候选变化会让旧结果失效，并要求在父线程最终 Gate 前重跑受影响验证的证据闭环图。](docs/assets/readme/evidence-gate-loop.svg)
@@ -138,7 +147,7 @@ git diff --check
 
 贡献、漏洞报告和行为规范见 [CONTRIBUTING.md](CONTRIBUTING.md)、[SECURITY.md](SECURITY.md) 与 [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)。项目采用 Apache-2.0，并发布在 `https://github.com/hongkai-hue/adaptive-subagent-orchestration`。
 
-完整的模块、信任边界和发布流程见 [架构说明](docs/architecture/oss-launch-architecture.md) 与 [交互式架构图](docs/architecture/oss-launch-architecture.html) 。
+完整的模块、信任边界和发布流程见 [架构说明](docs/architecture/oss-launch-architecture.md) 与 [交互式架构图](docs/architecture/oss-launch-architecture.html) 。D1 扩展见 [compute-offload 契约](docs/contracts/compute-offload-contract.md) 和 [compute-offload 架构](docs/architecture/compute-offload-architecture.md) 。
 
 ## 目录说明
 

@@ -10,6 +10,12 @@ import xml.etree.ElementTree as ET
 ROOT = Path(__file__).resolve().parents[1]
 ARCHITECTURE_MD = ROOT / "docs" / "architecture" / "oss-launch-architecture.md"
 ARCHITECTURE_HTML = ROOT / "docs" / "architecture" / "oss-launch-architecture.html"
+COMPUTE_OFFLOAD_ARCHITECTURE_MD = (
+    ROOT / "docs" / "architecture" / "compute-offload-architecture.md"
+)
+COMPUTE_OFFLOAD_ARCHITECTURE_HTML = (
+    ROOT / "docs" / "architecture" / "compute-offload-architecture.html"
+)
 README = ROOT / "README.md"
 README_ZH = ROOT / "README.zh-CN.md"
 README_VISUAL_ARCHITECTURE_MD = (
@@ -183,6 +189,40 @@ class ReadmeVisualArchitectureTests(unittest.TestCase):
         )
 
 
+class ComputeOffloadArchitectureTests(unittest.TestCase):
+    def test_compute_offload_architecture_has_required_boundaries(self):
+        markdown = COMPUTE_OFFLOAD_ARCHITECTURE_MD.read_text(encoding="utf-8")
+        for text in [
+            "## Module Responsibilities",
+            "## Data Flow And Trust Boundaries",
+            "## Failure Design And Recovery",
+            "## Deployment Units",
+            "## Parallelism Boundaries",
+            "D1",
+            "provider, model, account, proxy, and credential neutral",
+            "maximum live lane count one",
+        ]:
+            self.assertIn(text, markdown)
+
+    def test_compute_offload_diagram_has_export_and_route_flow(self):
+        html = COMPUTE_OFFLOAD_ARCHITECTURE_HTML.read_text(encoding="utf-8")
+        parser = _DocumentParser()
+        parser.feed(html)
+        self.assertIn("report-container", parser.ids)
+        for text in [
+            "Compute Offload Architecture",
+            "L0 • D1 • L1 • L2 • L3",
+            "D1 · ONE WORKER",
+            "EXPLORE → D1 / L1",
+            "Balanced compatibility",
+            "Compute-offload admission",
+            "function copyAsImage",
+            "function downloadPNG",
+            "function downloadPDF",
+        ]:
+            self.assertIn(text, html)
+
+
 class PublicDocsTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -200,7 +240,11 @@ class PublicDocsTests(unittest.TestCase):
             "templates/AGENTS-routing.md",
             "docs/cases/independent-write-lanes.md",
             "docs/cases/shared-hotspot-serial.md",
+            "docs/cases/single-worker-compute-offload.md",
             "docs/runtime-surface-matrix.md",
+            "docs/contracts/compute-offload-contract.md",
+            "docs/architecture/compute-offload-architecture.md",
+            "docs/architecture/compute-offload-architecture.html",
             "docs/architecture/readme-visual-polish-architecture.md",
             "docs/architecture/readme-visual-polish-architecture.html",
             "tests/evidence-template.md",
@@ -214,6 +258,7 @@ class PublicDocsTests(unittest.TestCase):
             "workflow contract, not a scheduler",
             "Without this skill",
             "**L0**",
+            "**D1**",
             "**L1**",
             "**L2**",
             "**L3**",
@@ -225,6 +270,8 @@ class PublicDocsTests(unittest.TestCase):
             "uninstall.sh",
             "timestamped sibling backup",
             "provider/model neutrality",
+            "compute-offload",
+            "host workspace",
             "UNVERIFIED",
         ]:
             self.assertIn(text, self.readme)
@@ -232,6 +279,7 @@ class PublicDocsTests(unittest.TestCase):
             "不是调度器",
             "不使用这个 skill",
             "**L0**",
+            "**D1**",
             "**L1**",
             "**L2**",
             "**L3**",
@@ -241,6 +289,8 @@ class PublicDocsTests(unittest.TestCase):
             "validate.sh",
             "uninstall.sh",
             "UNVERIFIED",
+            "compute-offload",
+            "宿主工作区",
         ]:
             self.assertIn(text, self.readme_zh)
 
@@ -251,10 +301,16 @@ class PublicDocsTests(unittest.TestCase):
         serial = (ROOT / "docs/cases/shared-hotspot-serial.md").read_text(
             encoding="utf-8"
         )
+        d1 = (ROOT / "docs/cases/single-worker-compute-offload.md").read_text(
+            encoding="utf-8"
+        )
         self.assertIn("Use two `worker` lanes in L2", independent)
         self.assertIn("no shared file", independent)
         self.assertIn("`SERIAL`", serial)
         self.assertIn("Shared writable path", serial)
+        self.assertIn("Choose D1 and dispatch exactly one `worker`", d1)
+        self.assertIn("Maximum simultaneous D1 subagents", d1)
+        self.assertIn("does not move local CPU execution", d1)
 
     def test_bilingual_readmes_share_visual_manifest_and_captions(self):
         english = _readme_image_entries(README)
