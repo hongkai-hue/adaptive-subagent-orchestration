@@ -4,10 +4,9 @@ Last verified: 2026-08-04
 
 ## Decision
 
-**The public Release Candidate is verified and release packaging is in progress.** The
-clean Public repository, GitHub Actions matrix, and fresh-clone lifecycle Gate have
-passed. The approval covers the `v0.1.0` tag and GitHub Release. External promotion is
-still outside this Flow.
+**The `v0.1.0` public release is online and verified.** The clean Public repository,
+GitHub Actions matrix, fresh-clone lifecycle Gate, tag, and GitHub Release have passed.
+External promotion is still outside this Flow.
 
 The public candidate must use a new clean history. The existing internal root commit
 contains earlier maintainer paths and local runtime-route evidence, and its author email
@@ -123,5 +122,5 @@ With OSS-09 explicitly approved:
 
 ## Final Gate
 
-The local and public Release Candidate Gates are accepted. The overall online goal remains
-in progress until OSS-11 completes.
+The local candidate, public candidate, tag, and GitHub Release Gates are accepted. OSS-00
+through OSS-11 are complete.

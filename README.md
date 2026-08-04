@@ -2,7 +2,7 @@
 
 Route a medium Codex task to the smallest useful set of lanes, keep one owner for each writable path, and finish with evidence that the parent agent can verify. This repository is the canonical source for the skill, its UI metadata, lifecycle scripts, tests, and public guidance. It is a workflow contract, not a scheduler or a replacement for the Codex runtime.
 
-**Current support status:** v0.1.0 release-ready. The public repository, GitHub Actions matrix, and fresh-clone lifecycle Gate have passed; the version tag and Release are the remaining publication steps. Static contracts, lifecycle behavior, and selected forward cases are covered by the repository tests. A sanitized desktop forward record covers representative routing and result collection. Complete App/CLI and OS coverage, implicit triggering, and request-level runtime identity remain unverified; see the [runtime surface matrix](docs/runtime-surface-matrix.md).
+**Current support status:** v0.1.0 is published. The public repository, GitHub Actions matrix, fresh-clone lifecycle Gate, version tag, and GitHub Release have passed verification. Static contracts, lifecycle behavior, and selected forward cases are covered by the repository tests. A sanitized desktop forward record covers representative routing and result collection. Complete App/CLI and OS coverage, implicit triggering, and request-level runtime identity remain unverified; see the [runtime surface matrix](docs/runtime-surface-matrix.md).
 
 ## What changes
 

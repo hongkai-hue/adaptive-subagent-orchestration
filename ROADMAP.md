@@ -2,9 +2,9 @@
 
 ## Current stage
 
-The `v0.1.0` open-source Release Candidate passed integration, independent QA, the public
-GitHub Actions matrix, and a full fresh-clone lifecycle Gate. Tag and Release creation are
-in progress.
+The `v0.1.0` open-source release is online. Integration, independent QA, the public GitHub
+Actions matrix, a full fresh-clone lifecycle Gate, the tag, and the GitHub Release are
+verified.
 
 ## Completed and verified
 
@@ -22,12 +22,11 @@ in progress.
 
 ## In progress
 
-- Create the `v0.1.0` tag and GitHub Release from the verified public candidate.
+- Collect additional sanitized App/CLI evidence before expanding support claims.
 
 ## Next
 
-- Record the public repository and Release evidence after online verification.
-- Collect additional sanitized App/CLI evidence before expanding support claims.
+- Evaluate post-release feedback without expanding the v0.1 support claim prematurely.
 
 ## Known limitations
 

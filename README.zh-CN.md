@@ -2,7 +2,7 @@
 
 这个 skill 把中等规模的 Codex 任务路由到最小且有价值的车道集合，为每个可写路径固定一个全程 owner，并要求主线程用证据完成最终 Gate。本仓库是 skill、UI 元数据、生命周期脚本、测试和公开文档的 canonical source；它不是调度器，也不替代 Codex runtime。
 
-**当前支持状态：** v0.1.0 已具备发布条件。Public 仓库、GitHub Actions 矩阵和公网 fresh-clone 生命周期 Gate 已通过，剩余步骤是创建版本 tag 与 Release。标准库契约测试覆盖静态规则、生命周期和若干前向用例；脱敏前向记录覆盖代表性的路由和结果回收。完整的 App／CLI 与操作系统覆盖、隐式触发和请求级 runtime identity 仍是未验证状态，详见 [运行面矩阵](docs/runtime-surface-matrix.md)。
+**当前支持状态：** v0.1.0 已发布。Public 仓库、GitHub Actions 矩阵、公网 fresh-clone 生命周期 Gate、版本 tag 与 GitHub Release 均已通过验证。标准库契约测试覆盖静态规则、生命周期和若干前向用例；脱敏前向记录覆盖代表性的路由和结果回收。完整的 App／CLI 与操作系统覆盖、隐式触发和请求级 runtime identity 仍是未验证状态，详见 [运行面矩阵](docs/runtime-surface-matrix.md)。
 
 ## 它解决什么
 
