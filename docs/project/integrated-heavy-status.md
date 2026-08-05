@@ -15,7 +15,7 @@ Last verified: 2026-08-05
 | IHG-08 | accepted | A0/QA | this Flow produced architecture, contracts, DAG, status and readiness; SVG visually inspected; final local Gate PASS | 1 | A0 | none |
 | IHG-09 | accepted | A0 | both managed local runtimes validate as v2; adaptive/heavy capabilities and byte equality tests PASS; prior runtimes preserved as backups | 1 | A0 | none |
 | IHG-10 | accepted | A0 | `45dd582`; fresh clone source validation, 60 tests, compile, shell syntax, diff check and clean status PASS | 1 | A0 | none |
-| IHG-11 | accepted | user/A0 | public `main` and `v0.2.0` point to `35f620e`; CI run `30972450660` has 3/3 jobs PASS; Release and public HTTP checks PASS | 2 | A0 | none |
+| IHG-11 | accepted | user/A0 | `v0.2.0` peels to release commit `35f620e`; public `main` contains the release plus post-release evidence; release and evidence CI runs have 3/3 jobs PASS; public HTTP checks PASS | 2 | A0 | none |
 
 ## State Rules
 

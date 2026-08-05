@@ -27,7 +27,7 @@ future tags, Releases, force pushes, deployments, or unrelated external mutation
 | IHG-06/07 | Recursive tests and public docs | PASS | 60 tests, links, SVG safety, bilingual visual manifest, privacy scan |
 | IHG-09 | Managed active suite | PASS | two validated v2 manifests, source/target capabilities, byte equality |
 | IHG-10 | Final candidate | PASS | local candidate and fresh clone source, 60 tests, compile, shell syntax, diff and clean-status Gates PASS |
-| IHG-11 | Publication | PASS after one repair | public `35f620e`; `v0.2.0`; CI `30972450660`; Release and main/tag HTTP checks PASS |
+| IHG-11 | Publication | PASS after one repair | release/tag `35f620e`; release CI `30972450660`; post-release evidence CI `30972626098`; Release and main/tag HTTP checks PASS |
 
 ## Integration And Security Evidence
 

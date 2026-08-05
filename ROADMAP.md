@@ -2,10 +2,11 @@
 
 ## Current stage
 
-Integrated Heavy Goals v0.2.0 is publicly released. Public `main` and annotated tag `v0.2.0` resolve
-to release commit `35f620e`; GitHub Release is public, latest, non-draft, and non-prerelease. CI run
-`30972450660` passes Ubuntu Python 3.9, Ubuntu Python 3.12, and macOS Python 3.12. Main/tag content
-and the Release page passed unauthenticated HTTP verification.
+Integrated Heavy Goals v0.2.0 is publicly released. Annotated tag `v0.2.0` resolves to release
+commit `35f620e`; public `main` contains that release plus post-release evidence. GitHub Release is
+public, latest, non-draft, and non-prerelease. Release CI `30972450660` and post-release evidence CI
+`30972626098` each pass Ubuntu Python 3.9, Ubuntu Python 3.12, and macOS Python 3.12. Main/tag
+content and the Release page passed unauthenticated HTTP verification.
 
 ## Completed and verified
 
