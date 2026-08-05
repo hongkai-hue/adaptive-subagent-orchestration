@@ -14,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS = ROOT / "scripts"
 NAME = "adaptive-subagent-orchestration"
 HEAVY_NAME = "orchestrate-heavy-goals"
+REAL_TEMP_ROOT = Path(tempfile.gettempdir()).resolve()
 
 
 def load_lifecycle():
@@ -30,7 +31,7 @@ class LifecycleScriptTests(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory(
             prefix=".adaptive-install-", dir=str(ROOT)
         )
-        self.external = tempfile.TemporaryDirectory(prefix="adaptive-suite-", dir="/private/tmp")
+        self.external = tempfile.TemporaryDirectory(prefix="adaptive-suite-", dir=REAL_TEMP_ROOT)
         self.workspace = Path(self.temp.name)
         self.home = self.workspace / "home"
         self.repo = self.workspace / "repo"
@@ -267,7 +268,7 @@ class LifecycleScriptTests(unittest.TestCase):
 
     def test_stage_failure_leaves_suite_targets_absent(self):
         lifecycle = load_lifecycle()
-        with tempfile.TemporaryDirectory(prefix="suite-fault-", dir="/private/tmp") as raw:
+        with tempfile.TemporaryDirectory(prefix="suite-fault-", dir=REAL_TEMP_ROOT) as raw:
             root = Path(raw) / "skills"
             original = lifecycle._copy_stage
 
@@ -285,7 +286,7 @@ class LifecycleScriptTests(unittest.TestCase):
 
     def test_activation_failure_rolls_back_new_suite(self):
         lifecycle = load_lifecycle()
-        with tempfile.TemporaryDirectory(prefix="suite-fault-", dir="/private/tmp") as raw:
+        with tempfile.TemporaryDirectory(prefix="suite-fault-", dir=REAL_TEMP_ROOT) as raw:
             root = Path(raw) / "skills"
             original = lifecycle._rename
 
@@ -302,7 +303,7 @@ class LifecycleScriptTests(unittest.TestCase):
 
     def test_uninstall_cleanup_failure_keeps_logical_uninstall(self):
         lifecycle = load_lifecycle()
-        with tempfile.TemporaryDirectory(prefix="suite-fault-", dir="/private/tmp") as raw:
+        with tempfile.TemporaryDirectory(prefix="suite-fault-", dir=REAL_TEMP_ROOT) as raw:
             root = Path(raw) / "skills"
             lifecycle.install(None, str(root), "all", False, False)
             with mock.patch.object(lifecycle, "_remove_tree", side_effect=OSError("injected cleanup failure")):
