@@ -207,7 +207,7 @@ flowchart LR
 
 ### IHG-11 Manual Public Gate
 
-- State: waiting_for_manual_gate
+- State: accepted
 - Owner: user / A0
 - Wave: W9
 - Depends on: IHG-10

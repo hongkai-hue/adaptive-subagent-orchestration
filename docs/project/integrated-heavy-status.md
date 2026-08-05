@@ -15,7 +15,7 @@ Last verified: 2026-08-05
 | IHG-08 | accepted | A0/QA | this Flow produced architecture, contracts, DAG, status and readiness; SVG visually inspected; final local Gate PASS | 1 | A0 | none |
 | IHG-09 | accepted | A0 | both managed local runtimes validate as v2; adaptive/heavy capabilities and byte equality tests PASS; prior runtimes preserved as backups | 1 | A0 | none |
 | IHG-10 | accepted | A0 | `45dd582`; fresh clone source validation, 60 tests, compile, shell syntax, diff check and clean status PASS | 1 | A0 | none |
-| IHG-11 | waiting_for_manual_gate | user/A0 | publication excluded from current automatic scope | 0 | none | exact public confirmation after RC |
+| IHG-11 | accepted | user/A0 | public `main` and `v0.2.0` point to `35f620e`; CI run `30972450660` has 3/3 jobs PASS; Release and public HTTP checks PASS | 2 | A0 | none |
 
 ## State Rules
 
@@ -29,5 +29,5 @@ Last verified: 2026-08-05
 ## Latest Recovery Check
 
 - Worktree inspected: yes; clean at baseline
-- Accepted Gates rerun: source-suite validation, 60-test recursive suite with both active runtimes, compile, shell syntax, diff check
-- Drift found: none on the final working candidate
+- Accepted Gates rerun: source-suite validation, 60-test recursive suite with both active runtimes, compile, shell syntax, diff check, fresh public clone, three-job CI, main/tag/release/public HTTP checks
+- Drift found: the first published test candidate exposed a Linux-only test-path defect; fixed by `35f620e`, then all required Gates passed

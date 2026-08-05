@@ -2,11 +2,10 @@
 
 ## Current stage
 
-The integrated Heavy Goals v0.2.0 candidate is implemented, locally activated, committed, accepted
-through a fresh-clone Gate, and explicitly authorized for publication. Adaptive L0-D2 routing, the `l3-v1` handoff, a
-self-contained heavy runtime, manifest-v2 atomic suite lifecycle, fixtures, documentation, and 60
-recursive tests pass. IHG-11 records the external push, tag, Release, CI, and public-content evidence
-after those operations complete.
+Integrated Heavy Goals v0.2.0 is publicly released. Public `main` and annotated tag `v0.2.0` resolve
+to release commit `35f620e`; GitHub Release is public, latest, non-draft, and non-prerelease. CI run
+`30972450660` passes Ubuntu Python 3.9, Ubuntu Python 3.12, and macOS Python 3.12. Main/tag content
+and the Release page passed unauthenticated HTTP verification.
 
 ## Completed and verified
 
@@ -22,6 +21,9 @@ after those operations complete.
 - Manifest v2 installs adaptive, heavy, or both; the `all` transaction stages and validates every
   member, rolls back activation failures, preserves recognized backups, and fails closed on private
   or drifted content.
+- IHG-11 publication completed through fresh temporary clones and normal pushes. The first public CI
+  exposed a macOS-specific hard-coded test temp path; `35f620e` repaired it with a resolved platform
+  temp root before the final tag and Release were accepted.
 - The compute-offload Release Candidate adds D1 single-worker admission, sequential discovery and
   read-only review, a frozen contract and architecture, bilingual guidance, and a five-level route
   graphic while preserving provider/model neutrality.
@@ -45,14 +47,12 @@ after those operations complete.
 
 ## In progress
 
-- Await an explicit decision for IHG-11 public push scope; tag and GitHub Release remain separately
-  scoped even if a normal push is later approved.
+- Collect additional sanitized App/CLI request-level evidence without expanding identity or
+  performance claims beyond direct observations.
 
 ## Next
 
-- After explicit authorization, publish the accepted v0.2 candidate through a fresh clone, then
-  separately decide whether to create a tag and GitHub Release.
-- Collect sanitized D1 and L3 App/CLI evidence before expanding support claims.
+- Evaluate v0.2 feedback and collect sanitized D1/L3 App/CLI evidence before expanding support claims.
 
 ## Known limitations
 
