@@ -1,0 +1,62 @@
+{
+  "schema_version": "1",
+  "handoff_version": "l3-v1",
+  "cases": [
+    {
+      "id": "l3-valid-ready",
+      "kind": "contract",
+      "packet": {"handoff_version":"l3-v1","handoff_id":"sha256:a587f510fcece728e8bdd32c4d4a00552ab002730abc343bec1373b6bb38f82d","ownership_epoch":1,"source_skill":"adaptive-subagent-orchestration","target_skill":"orchestrate-heavy-goals","orchestrator_owner":"parent","objective":"Deliver a verified integrated heavy flow.","done_when":["Architecture, contracts, implementation, and final Gate pass."],"non_goals":["Public release"],"constraints":["Preserve existing user changes"],"known_facts":["L3 threshold is met"],"evidence_paths":["docs/architecture/integrated-suite-architecture.md"],"project_rules":["Parent owns integration and final Gate"],"baseline_revision":"UNVERIFIED","existing_changes":[],"sensitive_context":{"status":"minimized","excluded":["credentials"]},"required_manual_gates":["Public release"],"open_questions":[],"cancelled_adaptive_lanes":[]},
+      "traits": [],
+      "expected": {"state":"HANDOFF_READY","error_code":"none","adaptive_owner":"released","heavy_owner":"pending"}
+    },
+    {
+      "id": "l3-missing-done-blocked",
+      "kind": "contract",
+      "packet": {"handoff_version":"l3-v1","handoff_id":"sha256:a587f510fcece728e8bdd32c4d4a00552ab002730abc343bec1373b6bb38f82d","ownership_epoch":1,"source_skill":"adaptive-subagent-orchestration","target_skill":"orchestrate-heavy-goals","orchestrator_owner":"parent","objective":"Deliver a verified integrated heavy flow.","done_when":[],"non_goals":["Public release"],"constraints":["Preserve existing user changes"],"known_facts":["L3 threshold is met"],"evidence_paths":["docs/architecture/integrated-suite-architecture.md"],"project_rules":["Parent owns integration and final Gate"],"baseline_revision":"UNVERIFIED","existing_changes":[],"sensitive_context":{"status":"minimized","excluded":["credentials"]},"required_manual_gates":["Public release"],"open_questions":[],"cancelled_adaptive_lanes":[]},
+      "traits": ["missing-done-when"],
+      "expected": {"state":"HANDOFF_BLOCKED","error_code":"L3_PACKET_INVALID","adaptive_owner":"active","heavy_owner":"none"}
+    },
+    {
+      "id": "l3-active-lane-cancel-first",
+      "kind": "safety",
+      "packet": {"handoff_version":"l3-v1","handoff_id":"sha256:a587f510fcece728e8bdd32c4d4a00552ab002730abc343bec1373b6bb38f82d","ownership_epoch":1,"source_skill":"adaptive-subagent-orchestration","target_skill":"orchestrate-heavy-goals","orchestrator_owner":"parent","objective":"Deliver a verified integrated heavy flow.","done_when":["Architecture, contracts, implementation, and final Gate pass."],"non_goals":["Public release"],"constraints":["Preserve existing user changes"],"known_facts":["L3 threshold is met"],"evidence_paths":["docs/architecture/integrated-suite-architecture.md"],"project_rules":["Parent owns integration and final Gate"],"baseline_revision":"UNVERIFIED","existing_changes":[],"sensitive_context":{"status":"minimized","excluded":["credentials"]},"required_manual_gates":["Public release"],"open_questions":[],"cancelled_adaptive_lanes":[{"lane_id":"lane-a","agent_id":"agent-a","owned_scope":["src/module"],"state":"active"}]},
+      "traits": ["active-adaptive-lane"],
+      "expected": {"state":"CANCEL_THEN_HANDOFF","error_code":"L3_ADAPTIVE_OWNER_ACTIVE","adaptive_owner":"cancelling","heavy_owner":"none"}
+    },
+    {
+      "id": "l3-sensitive-context-blocked",
+      "kind": "safety",
+      "packet": {"handoff_version":"l3-v1","handoff_id":"sha256:a587f510fcece728e8bdd32c4d4a00552ab002730abc343bec1373b6bb38f82d","ownership_epoch":1,"source_skill":"adaptive-subagent-orchestration","target_skill":"orchestrate-heavy-goals","orchestrator_owner":"parent","objective":"Deliver a verified integrated heavy flow.","done_when":["Architecture, contracts, implementation, and final Gate pass."],"non_goals":["Public release"],"constraints":["Preserve existing user changes"],"known_facts":["L3 threshold is met"],"evidence_paths":["docs/architecture/integrated-suite-architecture.md"],"project_rules":["Parent owns integration and final Gate"],"baseline_revision":"UNVERIFIED","existing_changes":[],"sensitive_context":{"status":"blocked","excluded":["credentials"]},"required_manual_gates":["Public release"],"open_questions":[],"cancelled_adaptive_lanes":[]},
+      "traits": ["sensitive-context-cannot-minimize"],
+      "expected": {"state":"HANDOFF_BLOCKED","error_code":"L3_SENSITIVE_CONTEXT","adaptive_owner":"active","heavy_owner":"none"}
+    },
+    {
+      "id": "l3-heavy-runtime-missing",
+      "kind": "routing",
+      "packet": {"handoff_version":"l3-v1","handoff_id":"sha256:a587f510fcece728e8bdd32c4d4a00552ab002730abc343bec1373b6bb38f82d","ownership_epoch":1,"source_skill":"adaptive-subagent-orchestration","target_skill":"orchestrate-heavy-goals","orchestrator_owner":"parent","objective":"Deliver a verified integrated heavy flow.","done_when":["Architecture, contracts, implementation, and final Gate pass."],"non_goals":["Public release"],"constraints":["Preserve existing user changes"],"known_facts":["L3 threshold is met"],"evidence_paths":["docs/architecture/integrated-suite-architecture.md"],"project_rules":["Parent owns integration and final Gate"],"baseline_revision":"UNVERIFIED","existing_changes":[],"sensitive_context":{"status":"minimized","excluded":["credentials"]},"required_manual_gates":["Public release"],"open_questions":[],"cancelled_adaptive_lanes":[]},
+      "traits": ["heavy-runtime-missing"],
+      "expected": {"state":"HANDOFF_BLOCKED","error_code":"L3_HEAVY_RUNTIME_MISSING","adaptive_owner":"released","heavy_owner":"none"}
+    },
+    {
+      "id": "l3-overrides-d1",
+      "kind": "routing",
+      "packet": {"handoff_version":"l3-v1","handoff_id":"sha256:a587f510fcece728e8bdd32c4d4a00552ab002730abc343bec1373b6bb38f82d","ownership_epoch":1,"source_skill":"adaptive-subagent-orchestration","target_skill":"orchestrate-heavy-goals","orchestrator_owner":"parent","objective":"Deliver a verified integrated heavy flow.","done_when":["Architecture, contracts, implementation, and final Gate pass."],"non_goals":["Public release"],"constraints":["Preserve existing user changes"],"known_facts":["L3 threshold is met"],"evidence_paths":["docs/architecture/integrated-suite-architecture.md"],"project_rules":["Parent owns integration and final Gate"],"baseline_revision":"UNVERIFIED","existing_changes":[],"sensitive_context":{"status":"minimized","excluded":["credentials"]},"required_manual_gates":["Public release"],"open_questions":[],"cancelled_adaptive_lanes":[]},
+      "traits": ["compute-offload-mode", "heavy-threshold"],
+      "expected": {"state":"HANDOFF_READY","error_code":"none","adaptive_owner":"released","heavy_owner":"pending"}
+    },
+    {
+      "id": "l3-digest-mismatch-blocked",
+      "kind": "contract",
+      "packet": {"handoff_version":"l3-v1","handoff_id":"sha256:0000000000000000000000000000000000000000000000000000000000000000","ownership_epoch":1,"source_skill":"adaptive-subagent-orchestration","target_skill":"orchestrate-heavy-goals","orchestrator_owner":"parent","objective":"Deliver a verified integrated heavy flow.","done_when":["Architecture, contracts, implementation, and final Gate pass."],"non_goals":["Public release"],"constraints":["Preserve existing user changes"],"known_facts":["L3 threshold is met"],"evidence_paths":["docs/architecture/integrated-suite-architecture.md"],"project_rules":["Parent owns integration and final Gate"],"baseline_revision":"UNVERIFIED","existing_changes":[],"sensitive_context":{"status":"minimized","excluded":["credentials"]},"required_manual_gates":["Public release"],"open_questions":[],"cancelled_adaptive_lanes":[]},
+      "traits": ["digest-mismatch"],
+      "expected": {"state":"HANDOFF_BLOCKED","error_code":"L3_PACKET_INVALID","adaptive_owner":"active","heavy_owner":"none"}
+    },
+    {
+      "id": "l3-baseline-drift-needs-rework",
+      "kind": "safety",
+      "packet": {"handoff_version":"l3-v1","handoff_id":"sha256:a587f510fcece728e8bdd32c4d4a00552ab002730abc343bec1373b6bb38f82d","ownership_epoch":1,"source_skill":"adaptive-subagent-orchestration","target_skill":"orchestrate-heavy-goals","orchestrator_owner":"parent","objective":"Deliver a verified integrated heavy flow.","done_when":["Architecture, contracts, implementation, and final Gate pass."],"non_goals":["Public release"],"constraints":["Preserve existing user changes"],"known_facts":["L3 threshold is met"],"evidence_paths":["docs/architecture/integrated-suite-architecture.md"],"project_rules":["Parent owns integration and final Gate"],"baseline_revision":"abcdef0","existing_changes":[],"sensitive_context":{"status":"minimized","excluded":["credentials"]},"required_manual_gates":["Public release"],"open_questions":[],"cancelled_adaptive_lanes":[]},
+      "traits": ["heavy-flow-active", "baseline-drift"],
+      "expected": {"state":"HEAVY_NEEDS_REWORK","error_code":"L3_BASELINE_DRIFT","adaptive_owner":"released","heavy_owner":"active"}
+    }
+  ]
+}

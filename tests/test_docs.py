@@ -16,6 +16,12 @@ COMPUTE_OFFLOAD_ARCHITECTURE_MD = (
 COMPUTE_OFFLOAD_ARCHITECTURE_HTML = (
     ROOT / "docs" / "architecture" / "compute-offload-architecture.html"
 )
+INTEGRATED_SUITE_ARCHITECTURE_MD = (
+    ROOT / "docs" / "architecture" / "integrated-suite-architecture.md"
+)
+INTEGRATED_SUITE_ARCHITECTURE_HTML = (
+    ROOT / "docs" / "architecture" / "integrated-suite-architecture.html"
+)
 README = ROOT / "README.md"
 README_ZH = ROOT / "README.zh-CN.md"
 README_VISUAL_ARCHITECTURE_MD = (
@@ -223,6 +229,61 @@ class ComputeOffloadArchitectureTests(unittest.TestCase):
             self.assertIn(text, html)
 
 
+class IntegratedSuiteArchitectureTests(unittest.TestCase):
+    def test_integrated_architecture_has_closed_loop_boundaries(self):
+        markdown = INTEGRATED_SUITE_ARCHITECTURE_MD.read_text(encoding="utf-8")
+        for text in [
+            "## Module Responsibilities",
+            "## Data Flow And Trust Boundaries",
+            "## Failure Design And Recovery",
+            "## Deployment Units",
+            "## Parallelism Boundaries",
+            "l3-v1",
+            "Heavy A0",
+            "architecture, contract, DAG, status, questions, and readiness",
+            "manual Gate",
+            "suite-root lock",
+            "public repository boundary",
+        ]:
+            self.assertIn(text, markdown)
+
+    def test_integrated_diagram_has_routes_lifecycle_and_export(self):
+        html = INTEGRATED_SUITE_ARCHITECTURE_HTML.read_text(encoding="utf-8")
+        parser = _DocumentParser()
+        parser.feed(html)
+        self.assertIn("report-container", parser.ids)
+        for text in [
+            '<html lang="en">',
+            'role="img"',
+            'aria-labelledby="diagram-title diagram-desc"',
+            'viewBox="0 0 1200 760"',
+            "ADAPTIVE ROUTER",
+            "L3-V1 PACKET",
+            "HEAVY A0",
+            "ARCHITECTURE + CONTRACT",
+            "WAVE DAG + RECOVERY",
+            "LAYERED QA",
+            "manual Gate for protected actions",
+            "SUITE SOURCE",
+            "STAGE",
+            "adaptive-subagent-orchestration",
+            "orchestrate-heavy-goals",
+            "function copyAsImage",
+            "function downloadPNG",
+            "function downloadPDF",
+            "overflow:auto",
+            "min-width:980px",
+        ]:
+            self.assertIn(text, html)
+        self.assertEqual(
+            [
+                "https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js",
+                "https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js",
+            ],
+            parser.scripts,
+        )
+
+
 class PublicDocsTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -241,10 +302,15 @@ class PublicDocsTests(unittest.TestCase):
             "docs/cases/independent-write-lanes.md",
             "docs/cases/shared-hotspot-serial.md",
             "docs/cases/single-worker-compute-offload.md",
+            "docs/cases/l3-end-to-end-flow.md",
             "docs/runtime-surface-matrix.md",
             "docs/contracts/compute-offload-contract.md",
+            "docs/contracts/l3-handoff-contract.md",
+            "docs/contracts/suite-lifecycle-contract.md",
             "docs/architecture/compute-offload-architecture.md",
             "docs/architecture/compute-offload-architecture.html",
+            "docs/architecture/integrated-suite-architecture.md",
+            "docs/architecture/integrated-suite-architecture.html",
             "docs/architecture/readme-visual-polish-architecture.md",
             "docs/architecture/readme-visual-polish-architecture.html",
             "tests/evidence-template.md",
@@ -263,7 +329,7 @@ class PublicDocsTests(unittest.TestCase):
             "**L2**",
             "**L3**",
             "$adaptive-subagent-orchestration",
-            "--target user --dry-run",
+            "--target user --skills all --dry-run",
             "--target repo",
             "--replace",
             "validate.sh",
@@ -272,6 +338,9 @@ class PublicDocsTests(unittest.TestCase):
             "provider/model neutrality",
             "compute-offload",
             "host workspace",
+            "$orchestrate-heavy-goals",
+            "l3-v1",
+            "--skills all",
             "UNVERIFIED",
         ]:
             self.assertIn(text, self.readme)
@@ -284,13 +353,16 @@ class PublicDocsTests(unittest.TestCase):
             "**L2**",
             "**L3**",
             "$adaptive-subagent-orchestration",
-            "--target user --dry-run",
+            "--target user --skills all --dry-run",
             "--replace",
             "validate.sh",
             "uninstall.sh",
             "UNVERIFIED",
             "compute-offload",
             "宿主工作区",
+            "$orchestrate-heavy-goals",
+            "l3-v1",
+            "--skills all",
         ]:
             self.assertIn(text, self.readme_zh)
 
@@ -304,6 +376,7 @@ class PublicDocsTests(unittest.TestCase):
         d1 = (ROOT / "docs/cases/single-worker-compute-offload.md").read_text(
             encoding="utf-8"
         )
+        l3 = (ROOT / "docs/cases/l3-end-to-end-flow.md").read_text(encoding="utf-8")
         self.assertIn("Use two `worker` lanes in L2", independent)
         self.assertIn("no shared file", independent)
         self.assertIn("`SERIAL`", serial)
@@ -311,6 +384,9 @@ class PublicDocsTests(unittest.TestCase):
         self.assertIn("Choose D1 and dispatch exactly one `worker`", d1)
         self.assertIn("Maximum simultaneous D1 subagents", d1)
         self.assertIn("does not move local CPU execution", d1)
+        self.assertIn("HANDOFF_READY", l3)
+        self.assertIn("same parent becomes heavy A0", l3)
+        self.assertIn("WAITING_FOR_MANUAL_GATE", l3)
 
     def test_bilingual_readmes_share_visual_manifest_and_captions(self):
         english = _readme_image_entries(README)
@@ -334,6 +410,12 @@ class PublicDocsTests(unittest.TestCase):
             )
             self.assertIn(
                 "docs/architecture/oss-launch-architecture.html", document
+            )
+            self.assertIn(
+                "docs/architecture/integrated-suite-architecture.md", document
+            )
+            self.assertIn(
+                "docs/architecture/integrated-suite-architecture.html", document
             )
 
     def test_readme_visual_assets_are_local_and_safe(self):

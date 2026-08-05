@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 620" role="img" aria-labelledby="title desc">
   <title id="title">Balanced and compute-offload routing levels</title>
-  <desc id="desc">A task moves to the smallest safe route: parent-local L0, opt-in single-worker D1, read-only L1, disjoint implementation L2, or an L3 heavy-orchestration handoff.</desc>
+  <desc id="desc">A task moves to the smallest safe route: parent-local L0, opt-in single-worker D1, read-only L1, disjoint implementation L2, or a closed-loop L3 handoff to the bundled heavy-goal skill.</desc>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
       <path d="M0 0L10 5L0 10Z" fill="#475569"/>
@@ -60,10 +60,10 @@
     <circle cx="1005" cy="330" r="25" fill="#7c3aed"/>
     <text x="1005" y="339" fill="#ffffff" font-size="22" font-weight="700" text-anchor="middle">L3</text>
     <text x="1043" y="337" fill="#0f172a" font-size="21" font-weight="700">HEAVY</text>
-    <text x="988" y="379" fill="#334155" font-size="16">DAG · recovery</text>
-    <text x="988" y="404" fill="#334155" font-size="16">release readiness</text>
-    <text x="988" y="431" fill="#334155" font-size="16">0 agents here</text>
-    <text x="988" y="458" fill="#7c3aed" font-size="16" font-weight="700">Heavy owns DAG</text>
+    <text x="988" y="379" fill="#334155" font-size="16">Bundled heavy skill</text>
+    <text x="988" y="404" fill="#334155" font-size="16">architecture → DAG</text>
+    <text x="988" y="431" fill="#334155" font-size="16">recovery → QA</text>
+    <text x="988" y="458" fill="#7c3aed" font-size="16" font-weight="700">l3-v1 closed loop</text>
 
     <rect x="60" y="515" width="1080" height="68" rx="16" fill="#fff7ed" stroke="#ea580c" stroke-width="2"/>
     <text x="90" y="557" fill="#9a3412" font-size="19" font-weight="700">SERIAL / BLOCKED</text>

@@ -1,13 +1,16 @@
 # Adaptive Subagent Orchestration OSS Launch Contract
 
 - Version: v1
-- Status: frozen
+- Status: frozen historical baseline; current lifecycle superseded by `suite-lifecycle-contract.md` v2
 - Owners: A0, A1
 
 ## Scope And Non-goals
 
 This contract freezes the public v0.1 boundary between the canonical skill package,
 lifecycle scripts, tests, installed bundle, Codex runtime, and release process.
+It remains normative only for interpreting a legacy v0.1 adaptive manifest. New installs write
+manifest v2 and follow the [suite lifecycle contract](suite-lifecycle-contract.md); where the two
+documents differ, v2 controls current behavior.
 
 In scope:
 
@@ -161,6 +164,8 @@ and repository. Tokens must not appear in command output, logs, manifests, or do
 ## Compatibility And Migration
 
 - Contract schema v1 and manifest schema v1 are stable for the v0.1 line.
+- The v0.2 reader still accepts the exact adaptive v1 manifest for validated replacement; the
+  writer emits only manifest v2 and never writes a new v1 tree.
 - The canonical public user install path is `~/.agents/skills` and the repository path
   is `.agents/skills`, matching current Codex documentation.
 - Existing private `~/.codex/skills` installs are not migrated automatically. A custom

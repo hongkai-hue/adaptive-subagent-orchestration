@@ -2,7 +2,7 @@
 
 Route a medium Codex task to the smallest useful set of lanes, keep one owner for each writable path, and finish with evidence that the parent agent can verify. This repository is the canonical source for the skill, its UI metadata, lifecycle scripts, tests, and public guidance. It is a workflow contract, not a scheduler or a replacement for the Codex runtime.
 
-**Current support status:** v0.1.0 is published. The next candidate adds opt-in D1 compute offload while preserving balanced routing as the default. Static contracts, lifecycle behavior, and selected forward cases are covered by repository tests. A sanitized desktop record covers representative v0.1 routing; request-level D1 execution, complete App/CLI and OS coverage, implicit triggering, and runtime identity remain unverified. See the [runtime surface matrix](docs/runtime-surface-matrix.md).
+**Current support status:** v0.2.0 is the current release. It keeps balanced routing as the default, retains opt-in D1 compute offload, and bundles `orchestrate-heavy-goals` so L3 has a versioned, testable execution path in the same repository. Static contracts, atomic suite lifecycle behavior, and forward fixtures are covered by repository tests. Request-level D1/L3 execution across every App/CLI and OS surface, implicit triggering, and runtime identity remain unverified. See the [runtime surface matrix](docs/runtime-surface-matrix.md).
 
 ![Abstract parent hub routing work through two isolated lanes and merging two evidence tokens into one result.](docs/assets/readme/hero-orchestration.webp)
 
@@ -36,7 +36,7 @@ The competing-lane distinction matters: one bounded implementation can use opt-i
 | **D1** | In explicit `compute-offload` mode, one non-trivial implementation has an exact owner, bounded write scope, reproducible Gate, and positive delegation value. | 1 `worker`, sequential | The worker implements; the parent inspects and reruns the final Gate. Work below five minutes stays L0. |
 | **L1** | Two independent read-only investigations materially reduce uncertainty. | 1-2 `explorer` | Each lane returns paths, lines, command output, or a clear blocker. |
 | **L2** | Two or more implementation lanes have disjoint scopes and independent Gates. | 1-3 `worker`/`default` | The parent integrates, rechecks ownership, and runs the final Gate. |
-| **L3** | The work spans modules, freezes a contract, or needs waves, recovery, or release readiness. | 0 here | Hand off to `orchestrate-heavy-goals`; do not run two orchestrators. |
+| **L3** | The work spans modules, freezes a contract, or needs waves, recovery, or release readiness. | Parent A0 + bounded domain/QA agents | Close adaptive lanes, transfer one `l3-v1` packet, then run the bundled heavy architecture → contract → DAG → implementation → QA flow. |
 
 `balanced` is the default and keeps ordinary single-lane work in L0. `compute-offload` is explicit and adds D1 for work estimated at least 10 minutes or with a recorded context-isolation benefit. A D1 discovery `explorer`, implementation `worker`, and optional read-only reviewer run sequentially, never simultaneously. Capacity, ownership, privacy, and dependency checks can still force `SERIAL` or `BLOCKED`.
 
@@ -54,6 +54,14 @@ To offload one bounded daily implementation, select the mode explicitly:
 Use $adaptive-subagent-orchestration in compute-offload mode. Give one worker the exact owned scope and Gate, then inspect the result and rerun the final Gate in the parent.
 ```
 
+To start a heavy goal directly, or after an adaptive L3 decision:
+
+```text
+Use $orchestrate-heavy-goals to establish the architecture, freeze contracts, build the wave DAG, execute bounded nodes, recover from drift, and produce verified release readiness. Stop at every manual Gate.
+```
+
+Adaptive and heavy keep one parent-thread orchestrator. A valid `l3-v1` handoff closes adaptive ownership before heavy A0 starts; unknown fields, active lanes, sensitive context, digest mismatch, baseline drift, or a missing heavy capability fail closed. See the [L3 handoff contract](docs/contracts/l3-handoff-contract.md).
+
 ![Sequence from user goal through parent preflight, bounded lane work, structured result inspection, and the parent final Gate.](docs/assets/readme/parent-agent-sequence.svg)
 
 *Figure 4. Transport completion is not business PASS; the parent inspects, integrates, and verifies.*
@@ -66,49 +74,54 @@ The UI metadata permits implicit eligibility, but it cannot make triggering dete
 
 *Figure 5. Lifecycle scripts mutate only after validation and preserve the target on uncertainty.*
 
-The package itself has no third-party runtime dependency and does not configure an account, provider, model, proxy, API key, or token. Codex supplies skill discovery and subagent capabilities. The scripts only manage the two runtime files and an ownership manifest.
+The package itself has no third-party runtime dependency and does not configure an account, provider, model, proxy, API key, or token. Codex supplies skill discovery and subagent capabilities. The lifecycle registry manages two exact runtime allowlists and one checksum manifest per installed skill.
 
-Preview a user install:
-
-```bash
-./scripts/install.sh --target user --dry-run
-```
-
-Install into the canonical user or current repository scope:
+Preview the recommended complete-suite install:
 
 ```bash
-./scripts/install.sh --target user
-./scripts/install.sh --target repo
+./scripts/install.sh --target user --skills all --dry-run
 ```
 
-For a custom location, pass an absolute path whose final component is exactly `adaptive-subagent-orchestration`:
+Install both skills into the canonical user or current repository scope:
 
 ```bash
-./scripts/install.sh --target /absolute/path/adaptive-subagent-orchestration --dry-run
-./scripts/install.sh --target /absolute/path/adaptive-subagent-orchestration
+./scripts/install.sh --target user --skills all
+./scripts/install.sh --target repo --skills all
 ```
 
-The default user target is `$HOME/.agents/skills/adaptive-subagent-orchestration`; the repository target is `.agents/skills/adaptive-subagent-orchestration` below the current working directory. Existing targets are never overwritten silently. Run with `--replace` only after reviewing the target:
+`--skills adaptive` remains the default for v0.1 command compatibility; use `--skills heavy` for only the heavy runtime. The recommended closed-loop setup is `--skills all`.
+
+For a custom suite root, pass an absolute skills directory:
 
 ```bash
-./scripts/install.sh --target user --replace
+./scripts/install.sh --target-root /absolute/path/to/skills --skills all --dry-run
+./scripts/install.sh --target-root /absolute/path/to/skills --skills all
 ```
 
-Replacement validates the existing manifest, stages and validates a fresh bundle, renames the old directory to a timestamped sibling backup, and validates the final target before reporting success. A failed replacement keeps the backup and reports its path. The manifest owns only `SKILL.md` and `agents/openai.yaml`.
+The legacy absolute `--target /absolute/path/adaptive-subagent-orchestration` remains adaptive-only. The default user root is `$HOME/.agents/skills`; the repository root is `.agents/skills` below the current working directory. Existing targets are never overwritten silently. Run with `--replace` only after reviewing every selected target:
+
+```bash
+./scripts/install.sh --target user --skills all --replace
+```
+
+Replacement validates all selected manifests and exact tree shapes, stages every bundle, creates each timestamped sibling backup, then activates and validates the suite atomically. A failure rolls all selected targets back; an unrecognized private directory is never replaced. Manifest v2 records exact files and the `l3-source:l3-v1` or `l3-target:l3-v1` capability.
 
 Validate a source or installed bundle:
 
 ```bash
 ./scripts/validate.sh .
 ./scripts/validate.sh "$HOME/.agents/skills/adaptive-subagent-orchestration"
+./scripts/validate.sh "$HOME/.agents/skills/orchestrate-heavy-goals"
 ```
 
 Uninstall is dry-run capable and fail-closed. It removes only manifest-owned files whose checksums still match; a modified owned file, malformed manifest, symlink escape, or lock conflict blocks deletion and leaves the target in place:
 
 ```bash
-./scripts/uninstall.sh --target user --dry-run
-./scripts/uninstall.sh --target user
+./scripts/uninstall.sh --target user --skills all --dry-run
+./scripts/uninstall.sh --target user --skills all
 ```
+
+Full-suite uninstall validates both members, logically removes both by rename, then cleans the staged directories. A partial suite, unknown entry, checksum drift, symlink, or lock conflict deletes nothing.
 
 Private legacy installs are not migrated automatically. Use an explicit custom target only when you intend to operate on it. Do not point a target at this source checkout.
 
@@ -119,6 +132,7 @@ Read the public cases before splitting work:
 - [Single-worker compute offload](docs/cases/single-worker-compute-offload.md) shows D1 admission, sequential discovery/review, and fail-closed boundaries.
 - [Independent write lanes](docs/cases/independent-write-lanes.md) shows an L2 split with disjoint owners and separate Gates.
 - [Shared hotspot serial](docs/cases/shared-hotspot-serial.md) shows why two writers touching one file stay on the main thread.
+- [L3 end-to-end flow](docs/cases/l3-end-to-end-flow.md) shows adaptive detection, ownership release, the `l3-v1` packet, heavy phases, layered QA, and the manual publication Gate.
 
 The cases are contract examples, not performance promises. Token budgets, conflicts, task duration, and runtime scheduling remain host- and task-dependent.
 
@@ -130,7 +144,8 @@ The cases are contract examples, not performance promises. Token budgets, confli
 - **Conflicts and tokens:** the skill can classify shared ownership and note token or context limits, but it cannot reserve files, guarantee token availability, or promise speed, cost, or quality improvements.
 - **Runtime boundary:** Codex, not this repository, creates, waits for, and closes subagents. Transport completion is not a business `PASS`; the parent must inspect the structured result and rerun any invalidated Gate.
 - **Command boundary:** builds, tests, and shell commands still run in the host workspace. D1 delegates model reasoning and tool control; it does not move local CPU execution to a remote model service.
-- **Platform status:** the [runtime surface matrix](docs/runtime-surface-matrix.md) distinguishes static and forward evidence from unverified App, CLI, and OS coverage. Windows is outside the v0.1 support claim.
+- **Heavy boundary:** the bundled heavy skill provides the workflow and local scaffold, not a persistent scheduler. A0 still depends on Codex task state and committed Flow artifacts for recovery.
+- **Platform status:** the [runtime surface matrix](docs/runtime-surface-matrix.md) distinguishes static and forward evidence from unverified App, CLI, and OS coverage. Windows remains outside the current support claim.
 
 ![Evidence loop in which candidate changes invalidate stale results and force affected verification before the parent final Gate.](docs/assets/readme/evidence-gate-loop.svg)
 
@@ -138,26 +153,32 @@ The cases are contract examples, not performance promises. Token budgets, confli
 
 ## Development
 
-The canonical source is this repository. The runtime bundle is limited to `SKILL.md`, `agents/openai.yaml`, and `.install-manifest.json` after installation; tests and docs are not copied into it.
+The canonical source is this repository. Adaptive installs two runtime files; heavy installs its Skill, metadata, seven references, and scaffold script. Each installed directory also has one manifest; repository tests and public docs are not copied.
 
 Run the standard-library test suite and source validation:
 
 ```bash
 python3 -m unittest discover -s tests -v
 ./scripts/validate.sh .
-python3 -m compileall -q scripts
+python3 -m compileall -q scripts tests
+bash -n scripts/*.sh
 git diff --check
 ```
 
 See [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) before opening a change. The project is published under Apache-2.0 at `https://github.com/hongkai-hue/adaptive-subagent-orchestration`.
 
-For the complete module, trust-boundary, and publication flow, read the [architecture notes](docs/architecture/oss-launch-architecture.md) or open the [interactive architecture diagram](docs/architecture/oss-launch-architecture.html). The D1 extension is specified in the [compute-offload contract](docs/contracts/compute-offload-contract.md) and [compute-offload architecture](docs/architecture/compute-offload-architecture.md).
+For the integrated routing, handoff, heavy Flow, and atomic lifecycle, read the [suite architecture](docs/architecture/integrated-suite-architecture.md) or open its [interactive diagram](docs/architecture/integrated-suite-architecture.html). D1 remains specified by the [compute-offload contract](docs/contracts/compute-offload-contract.md); L3 is frozen by the [handoff contract](docs/contracts/l3-handoff-contract.md) and [suite lifecycle contract](docs/contracts/suite-lifecycle-contract.md).
+
+The original publication model remains documented in the [v0.1 architecture notes](docs/architecture/oss-launch-architecture.md) and [interactive launch diagram](docs/architecture/oss-launch-architecture.html).
 
 ## Repository map
 
 - [`SKILL.md`](SKILL.md) is the English runtime routing contract.
 - [`agents/openai.yaml`](agents/openai.yaml) contains discovery and invocation metadata.
+- [`skills/orchestrate-heavy-goals/`](skills/orchestrate-heavy-goals/) is the self-contained heavy runtime source.
 - [`scripts/`](scripts/) contains install, validate, and uninstall entry points.
+- [`docs/contracts/l3-handoff-contract.md`](docs/contracts/l3-handoff-contract.md) freezes the adaptive-to-heavy ownership transfer.
+- [`docs/contracts/suite-lifecycle-contract.md`](docs/contracts/suite-lifecycle-contract.md) freezes manifest v2 and atomic two-skill lifecycle behavior.
 - [`docs/contracts/oss-launch-contract.md`](docs/contracts/oss-launch-contract.md) freezes the v1 lifecycle boundary.
 - [`docs/architecture/oss-launch-architecture.md`](docs/architecture/oss-launch-architecture.md) explains module ownership and trust boundaries.
 - [`docs/runtime-surface-matrix.md`](docs/runtime-surface-matrix.md) records current evidence and limitations.

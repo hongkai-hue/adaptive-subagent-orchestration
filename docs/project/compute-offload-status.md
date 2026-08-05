@@ -1,6 +1,6 @@
 # Compute Offload Status
 
-Last verified: 2026-08-04T23:31:00+08:00
+Last verified: 2026-08-05T00:08:00+08:00
 
 | Node | State | Owner | Evidence | Attempts | Lease / agent | Blocker / next action |
 | --- | --- | --- | --- | ---: | --- | --- |
@@ -12,7 +12,7 @@ Last verified: 2026-08-04T23:31:00+08:00
 | CO-05 | accepted | A0 | bilingual guidance, five-level routing graphic, D1 case, evidence/matrix/template updates | 1 | A0 | none |
 | CO-06 | accepted | A0/QA | source valid; 36/36 recursive tests, compile, shell syntax, and diff check PASS | 1 | A0 | none |
 | CO-07 | accepted | A0 | user policy updated; legacy bundle preserved as sibling backup; managed active bundle validated and byte-matched | 1 | none | none |
-| CO-08 | waiting_for_manual_gate | user/A0 | public target recorded | 0 | none | exact push confirmation after local RC |
+| CO-08 | accepted | user/A0 | fresh-clone normal push `cd2775d3`; three-job CI PASS; public README, case, contract, and route asset reachable | 1 | none | none |
 
 ## State Rules
 
@@ -32,3 +32,4 @@ Last verified: 2026-08-04T23:31:00+08:00
 - Local activation: managed bundle manifest valid; runtime files match canonical source; three role routes statically match the requested local configuration
 - Runtime identity: still `UNVERIFIED` without request-level evidence
 - Drift found: legacy active bundle had no ownership manifest; preserved as a recoverable sibling backup before fresh installation
+- Public verification: remote `main` equals `cd2775d3c0316c07f2b31ac83c126a60f4c27e4f`; CI run `30936673754` PASS; selected public URLs returned HTTP 200

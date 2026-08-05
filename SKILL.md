@@ -15,15 +15,39 @@ Evaluate these rules in order before creating any agent.
 
 ### 1. Escalate to L3
 
-Stop this workflow and hand the task to `orchestrate-heavy-goals` when any condition
-applies:
+Stop adaptive lane creation and hand the task to the bundled `orchestrate-heavy-goals` runtime
+when any condition applies:
 
 - The work spans at least three modules or directories and has four or more independent acceptance nodes.
 - The work must freeze a cross-module API, protocol, state machine, or data format.
 - The work will continue across multiple Codex tasks or sessions.
 - The work needs a DAG, waves, retries, recovery, independent QA, or release readiness.
 
-Do not let two skills manage the same work.
+Do not let two skills manage the same work. Close or cancel every adaptive lane, release its write
+scope, and keep the same parent thread as A0. Before invoking heavy, build a fail-closed `l3-v1`
+packet with these identity constants:
+
+```text
+source_skill: adaptive-subagent-orchestration
+target_skill: orchestrate-heavy-goals
+orchestrator_owner: parent
+```
+
+The packet must contain exactly these fields:
+
+```text
+handoff_version, handoff_id, ownership_epoch, source_skill, target_skill,
+orchestrator_owner, objective, done_when, non_goals, constraints, known_facts,
+evidence_paths, project_rules, baseline_revision, existing_changes,
+sensitive_context, required_manual_gates, open_questions,
+cancelled_adaptive_lanes
+```
+
+Require one to three verifiable `done_when` conditions, `sensitive_context.status: minimized`, a
+canonical SHA-256 packet digest, and proof that every adaptive lane is `cancelled` or `closed`.
+Unknown versions or fields, an active owner, a digest mismatch, missing heavy capability
+`l3-target:l3-v1`, or baseline drift blocks handoff. Only `HANDOFF_READY` transfers orchestration;
+the heavy runtime then follows its bundled `references/l3-handoff.md` contract.
 
 ### 2. Keep Unsafe Work Serial
 

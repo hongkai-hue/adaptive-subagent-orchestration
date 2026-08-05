@@ -191,7 +191,7 @@ flowchart LR
 
 ### CO-08 Manual Public Push
 
-- State: waiting_for_manual_gate
+- State: accepted
 - Owner: user/A0
 - Wave: W6
 - Depends on: CO-07
@@ -231,7 +231,7 @@ desktop parent route.
 
 - CO-07 is cancelled if the canonical candidate fails or local role routing no longer matches the
   required role boundary; public work may still remain a Release Candidate.
-- CO-08 remains `waiting_for_manual_gate` until the user authorizes the exact push.
+- CO-08 was accepted after explicit authorization, fresh-clone normal push, CI, and public checks.
 - Any runtime or fixture change invalidates CO-06 and all downstream evidence.
 - A failed local migration restores the sibling backup before another attempt.
 - The graph is acyclic; cancelled optional release work does not invalidate accepted local work.

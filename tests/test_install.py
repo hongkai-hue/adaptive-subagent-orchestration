@@ -1,15 +1,28 @@
 import hashlib
+import importlib.util
 import json
 import os
 from pathlib import Path
 import subprocess
+import sys
 import tempfile
 import unittest
+from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS = ROOT / "scripts"
 NAME = "adaptive-subagent-orchestration"
+HEAVY_NAME = "orchestrate-heavy-goals"
+
+
+def load_lifecycle():
+    spec = importlib.util.spec_from_file_location("suite_lifecycle", SCRIPTS / "_lifecycle.py")
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
 
 
 class LifecycleScriptTests(unittest.TestCase):
@@ -17,6 +30,7 @@ class LifecycleScriptTests(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory(
             prefix=".adaptive-install-", dir=str(ROOT)
         )
+        self.external = tempfile.TemporaryDirectory(prefix="adaptive-suite-", dir="/private/tmp")
         self.workspace = Path(self.temp.name)
         self.home = self.workspace / "home"
         self.repo = self.workspace / "repo"
@@ -27,6 +41,10 @@ class LifecycleScriptTests(unittest.TestCase):
 
     def tearDown(self):
         self.temp.cleanup()
+        self.external.cleanup()
+
+    def external_root(self, name):
+        return Path(self.external.name) / name
 
     def run_script(self, script, *args, cwd=None):
         return subprocess.run(
@@ -47,7 +65,7 @@ class LifecycleScriptTests(unittest.TestCase):
         self.assertFalse(self.user_target().exists())
         self.assertFalse((self.home / ".agents").exists())
 
-    def test_install_writes_runtime_and_v1_manifest(self):
+    def test_install_writes_runtime_and_v2_manifest(self):
         result = self.run_script("install.sh", "--target", "user")
         self.assertEqual(result.returncode, 0, result.stderr)
         target = self.user_target()
@@ -61,12 +79,14 @@ class LifecycleScriptTests(unittest.TestCase):
         )
         manifest = json.loads((target / ".install-manifest.json").read_text())
         self.assertEqual(
-            {"schema_version", "skill_name", "installed_version", "files"},
+            {"schema_version", "suite_name", "skill_name", "installed_version", "capabilities", "files"},
             set(manifest),
         )
-        self.assertEqual("1", manifest["schema_version"])
+        self.assertEqual("2", manifest["schema_version"])
+        self.assertEqual(NAME, manifest["suite_name"])
         self.assertEqual(NAME, manifest["skill_name"])
-        self.assertEqual("0.1.0", manifest["installed_version"])
+        self.assertEqual("0.2.0", manifest["installed_version"])
+        self.assertEqual(["l3-source:l3-v1"], manifest["capabilities"])
         self.assertEqual({"SKILL.md", "agents/openai.yaml"}, set(manifest["files"]))
         for relative in ("SKILL.md", "agents/openai.yaml"):
             digest = hashlib.sha256((target / relative).read_bytes()).hexdigest()
@@ -163,11 +183,135 @@ class LifecycleScriptTests(unittest.TestCase):
     def test_target_scoped_lock_blocks_mutation(self):
         target = self.user_target()
         target.parent.mkdir(parents=True)
-        lock = target.parent / ("." + NAME + ".lock")
+        lock = target.parent / ".adaptive-subagent-orchestration-suite.lock"
         lock.mkdir()
         result = self.run_script("install.sh", "--target", "user")
         self.assertNotEqual(result.returncode, 0)
         self.assertFalse(target.exists())
+
+    def test_default_remains_adaptive_only(self):
+        result = self.run_script("install.sh", "--target", "user")
+        self.assertEqual(0, result.returncode, result.stderr)
+        root = self.home / ".agents" / "skills"
+        self.assertTrue((root / NAME).is_dir())
+        self.assertFalse((root / HEAVY_NAME).exists())
+
+    def test_install_validate_and_uninstall_full_suite(self):
+        root = self.external_root("suite-root")
+        result = self.run_script("install.sh", "--target-root", str(root), "--skills", "all")
+        self.assertEqual(0, result.returncode, result.stderr)
+        adaptive = root / NAME
+        heavy = root / HEAVY_NAME
+        self.assertTrue(adaptive.is_dir())
+        self.assertTrue(heavy.is_dir())
+        heavy_manifest = json.loads((heavy / ".install-manifest.json").read_text())
+        self.assertEqual(["l3-target:l3-v1"], heavy_manifest["capabilities"])
+        self.assertEqual(10, len(heavy_manifest["files"]))
+        for target in (adaptive, heavy):
+            checked = self.run_script("validate.sh", str(target))
+            self.assertEqual(0, checked.returncode, checked.stderr)
+        removed = self.run_script("uninstall.sh", "--target-root", str(root), "--skills", "all")
+        self.assertEqual(0, removed.returncode, removed.stderr)
+        self.assertFalse(adaptive.exists())
+        self.assertFalse(heavy.exists())
+
+    def test_target_root_works_without_explicit_target_and_conflict_fails(self):
+        root = self.external_root("custom-root")
+        okay = self.run_script("install.sh", "--target-root", str(root), "--skills", "heavy")
+        self.assertEqual(0, okay.returncode, okay.stderr)
+        conflict = self.run_script(
+            "install.sh", "--target", "user", "--target-root", str(root), "--skills", "adaptive"
+        )
+        self.assertNotEqual(0, conflict.returncode)
+        self.assertIn("LIFECYCLE_TARGET_INVALID", conflict.stderr)
+
+    def test_partial_suite_uninstall_fails_without_deleting_member(self):
+        root = self.external_root("partial-root")
+        installed = self.run_script("install.sh", "--target-root", str(root), "--skills", "adaptive")
+        self.assertEqual(0, installed.returncode, installed.stderr)
+        result = self.run_script("uninstall.sh", "--target-root", str(root), "--skills", "all")
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("LIFECYCLE_PARTIAL_SUITE", result.stderr)
+        self.assertTrue((root / NAME).is_dir())
+
+    def test_unknown_installed_entry_blocks_replace_and_uninstall(self):
+        root = self.external_root("unknown-root")
+        installed = self.run_script("install.sh", "--target-root", str(root), "--skills", "heavy")
+        self.assertEqual(0, installed.returncode, installed.stderr)
+        unknown = root / HEAVY_NAME / "private.txt"
+        unknown.write_text("user data", encoding="utf-8")
+        replaced = self.run_script(
+            "install.sh", "--target-root", str(root), "--skills", "heavy", "--replace"
+        )
+        removed = self.run_script("uninstall.sh", "--target-root", str(root), "--skills", "heavy")
+        self.assertNotEqual(0, replaced.returncode)
+        self.assertNotEqual(0, removed.returncode)
+        self.assertEqual("user data", unknown.read_text(encoding="utf-8"))
+
+    def test_valid_legacy_adaptive_v1_upgrades_to_v2(self):
+        installed = self.run_script("install.sh", "--target", "user")
+        self.assertEqual(0, installed.returncode, installed.stderr)
+        target = self.user_target()
+        current = json.loads((target / ".install-manifest.json").read_text())
+        legacy = {
+            "schema_version": "1",
+            "skill_name": NAME,
+            "installed_version": "0.1.0",
+            "files": current["files"],
+        }
+        (target / ".install-manifest.json").write_text(json.dumps(legacy) + "\n")
+        upgraded = self.run_script("install.sh", "--target", "user", "--replace")
+        self.assertEqual(0, upgraded.returncode, upgraded.stderr)
+        manifest = json.loads((target / ".install-manifest.json").read_text())
+        self.assertEqual("2", manifest["schema_version"])
+
+    def test_stage_failure_leaves_suite_targets_absent(self):
+        lifecycle = load_lifecycle()
+        with tempfile.TemporaryDirectory(prefix="suite-fault-", dir="/private/tmp") as raw:
+            root = Path(raw) / "skills"
+            original = lifecycle._copy_stage
+
+            def fail_heavy(stage, bundle):
+                if bundle.selector == "heavy":
+                    raise lifecycle.LifecycleError("LIFECYCLE_STAGE_FAILED", "injected")
+                return original(stage, bundle)
+
+            with mock.patch.object(lifecycle, "_copy_stage", side_effect=fail_heavy):
+                with self.assertRaises(lifecycle.LifecycleError):
+                    lifecycle.install(None, str(root), "all", False, False)
+            self.assertFalse((root / NAME).exists())
+            self.assertFalse((root / HEAVY_NAME).exists())
+            self.assertFalse(list(root.glob(".*.staging-*")))
+
+    def test_activation_failure_rolls_back_new_suite(self):
+        lifecycle = load_lifecycle()
+        with tempfile.TemporaryDirectory(prefix="suite-fault-", dir="/private/tmp") as raw:
+            root = Path(raw) / "skills"
+            original = lifecycle._rename
+
+            def fail_heavy_activation(source, target):
+                if target.name == HEAVY_NAME and ".staging-" in source.name:
+                    raise OSError("injected activation failure")
+                return original(source, target)
+
+            with mock.patch.object(lifecycle, "_rename", side_effect=fail_heavy_activation):
+                with self.assertRaises(lifecycle.LifecycleError):
+                    lifecycle.install(None, str(root), "all", False, False)
+            self.assertFalse((root / NAME).exists())
+            self.assertFalse((root / HEAVY_NAME).exists())
+
+    def test_uninstall_cleanup_failure_keeps_logical_uninstall(self):
+        lifecycle = load_lifecycle()
+        with tempfile.TemporaryDirectory(prefix="suite-fault-", dir="/private/tmp") as raw:
+            root = Path(raw) / "skills"
+            lifecycle.install(None, str(root), "all", False, False)
+            with mock.patch.object(lifecycle, "_remove_tree", side_effect=OSError("injected cleanup failure")):
+                with self.assertRaises(lifecycle.LifecycleError) as raised:
+                    lifecycle.uninstall(None, str(root), "all", False)
+            self.assertEqual("LIFECYCLE_UNINSTALL_CLEANUP_PENDING", raised.exception.code)
+            self.assertFalse((root / NAME).exists())
+            self.assertFalse((root / HEAVY_NAME).exists())
+            self.assertEqual(2, len(list(root.glob(".*.uninstall-*"))))
 
 
 if __name__ == "__main__":

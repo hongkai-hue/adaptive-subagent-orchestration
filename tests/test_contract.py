@@ -48,7 +48,7 @@ class SkillContractTests(unittest.TestCase):
     def test_skill_stays_lightweight(self):
         line_count = len(self.skill_text.splitlines())
         self.assertGreaterEqual(line_count, 150)
-        self.assertLessEqual(line_count, 180)
+        self.assertLessEqual(line_count, 220)
 
     def test_goal_owner_and_packet_contract(self):
         required = [
@@ -107,7 +107,7 @@ class SkillContractTests(unittest.TestCase):
     def test_openai_metadata_contract(self):
         required = [
             'display_name: "Adaptive Subagent Orchestrator"',
-            'short_description: "Route local, single-worker, parallel, or heavy-goal work safely"',
+            'short_description: "Route local, offloaded, parallel, or bundled heavy-goal work safely"',
             "$adaptive-subagent-orchestration",
             "balanced mode unless host policy explicitly selects compute-offload",
             "allow_implicit_invocation: true",
@@ -129,7 +129,7 @@ class SkillContractTests(unittest.TestCase):
             self.assertIsNone(re.search(pattern, combined, re.IGNORECASE), pattern)
 
     def test_forward_fixture_schema_and_ids(self):
-        self.assertEqual("2", self.fixture["schema_version"])
+        self.assertEqual("3", self.fixture["schema_version"])
         cases = self.fixture["cases"]
         self.assertGreaterEqual(len(cases), 25)
         ids = [case["id"] for case in cases]
@@ -143,13 +143,30 @@ class SkillContractTests(unittest.TestCase):
             )
             self.assertIn(case["input"]["mode"], {"balanced", "compute-offload"})
             self.assertEqual(
-                {"level", "roles", "max_agents", "business_status", "evidence_rule"},
+                {"level", "roles", "max_agents", "business_status", "evidence_rule", "handoff_state"},
                 set(case["expected"]),
             )
             self.assertIn(case["expected"]["level"], {"L0", "D1", "L1", "L2", "L3", "SERIAL", "BLOCKED"})
             self.assertIn(case["expected"]["business_status"], {"PASS", "BLOCKED", "UNVERIFIED"})
             self.assertLessEqual(case["expected"]["max_agents"], 3)
             self.assertTrue(set(case["expected"]["roles"]).issubset({"explorer", "worker", "default"}))
+            expected_handoff = "HANDOFF_READY" if case["expected"]["level"] == "L3" else "none"
+            self.assertEqual(expected_handoff, case["expected"]["handoff_state"])
+
+    def test_l3_handoff_runtime_contract(self):
+        required = [
+            "l3-v1",
+            "source_skill: adaptive-subagent-orchestration",
+            "target_skill: orchestrate-heavy-goals",
+            "orchestrator_owner: parent",
+            "ownership_epoch",
+            "cancelled_adaptive_lanes",
+            "l3-target:l3-v1",
+            "HANDOFF_READY",
+            "Unknown versions or fields",
+        ]
+        for text in required:
+            self.assertIn(text, self.skill_text)
 
     def test_required_forward_cases_have_expected_outcomes(self):
         cases = {case["id"]: case["expected"] for case in self.fixture["cases"]}

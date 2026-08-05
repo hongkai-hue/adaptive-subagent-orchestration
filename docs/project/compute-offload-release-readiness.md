@@ -2,8 +2,8 @@
 
 ## Decision
 
-Local Release Candidate ready. Public publication remains blocked on the explicit manual push
-Gate; this document is not a push authorization.
+Released and verified. The user approved the manual push Gate, the accepted tree was published
+through a fresh clone with a normal push, and public verification passed.
 
 ## Delivered Scope
 
@@ -24,6 +24,7 @@ Gate; this document is not a push authorization.
 | CO-05 | Docs and cases | PASS | bilingual links, local assets, D1 case, privacy assertions PASS |
 | CO-06 | Integrated candidate | PASS | 36/36 recursive tests, compile, shell syntax, and diff check PASS |
 | CO-07 | Local activation | PASS | policy present; active bundle valid, manifested, and byte-equal to canonical runtime |
+| CO-08 | Public release | PASS | remote `main@cd2775d3`; three-job CI PASS; selected public files returned HTTP 200 |
 
 ## Integration And Security Evidence
 
@@ -49,7 +50,7 @@ Gate; this document is not a push authorization.
 
 ## Open Questions And Defaults
 
-- Q-CO-003 remains open: public `main` push requires explicit user authorization.
+- Q-CO-003 is answered: fresh-clone normal push was authorized and verified.
 - `balanced` remains the public default; local host policy selects compute-offload for eligible
   daily implementation work.
 
@@ -69,10 +70,10 @@ Gate; this document is not a push authorization.
 
 ## Manual Release Steps
 
-1. Receive explicit authorization for Q-CO-003.
-2. Create a new temporary clone of the public repository.
-3. Copy only the accepted public candidate, run the full Gate, commit, and use a normal push.
-4. Verify the remote commit, GitHub Actions, README rendering, and public asset links.
+1. [x] Receive explicit authorization for Q-CO-003.
+2. [x] Create a new temporary clone of the public repository.
+3. [x] Copy only the accepted public candidate, run the full Gate, commit, and use a normal push.
+4. [x] Verify the remote commit, GitHub Actions, README content, and public asset links.
 
 ## Final Gate
 
@@ -84,4 +85,10 @@ bash -n scripts/*.sh                                         PASS
 git diff --check                                             PASS
 ```
 
-Release readiness: `READY_FOR_MANUAL_PUSH_GATE`.
+Release status: `PUBLISHED_AND_VERIFIED`.
+
+Public evidence:
+
+- Commit: `cd2775d3c0316c07f2b31ac83c126a60f4c27e4f`
+- CI: `https://github.com/hongkai-hue/adaptive-subagent-orchestration/actions/runs/30936673754`
+- Repository: `https://github.com/hongkai-hue/adaptive-subagent-orchestration`

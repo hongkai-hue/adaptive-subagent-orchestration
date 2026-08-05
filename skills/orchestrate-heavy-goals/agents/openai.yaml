@@ -1,0 +1,7 @@
+interface:
+  display_name: "Heavy Goal Orchestrator"
+  short_description: "Deliver cross-module goals with recoverable DAGs and layered QA"
+  default_prompt: "Use $orchestrate-heavy-goals to accept a valid l3-v1 handoff or build an architecture-first Flow with frozen contracts, wave execution, recovery, and verified readiness."
+
+policy:
+  allow_implicit_invocation: true
